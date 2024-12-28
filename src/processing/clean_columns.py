@@ -1,10 +1,10 @@
 import re
 
 def extract_distance(category):
-    if "1K" in category:
+    if "1K" in category or "1 K" in category:
         return "1K"
     elif "5 KM" in category:
-        return "5 KM"
+        return "5K"
     return None
 
 def extract_age_range(category):
