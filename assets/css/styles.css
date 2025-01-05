@@ -1,0 +1,159 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%; /* Asegura que el contenido ocupe toda la altura */
+    display: flex;
+    flex-direction: column; /* Ordena los hijos en columna */
+    background: linear-gradient(to bottom, #0a9396, #94d2bd); /* Fondo de la página */
+    color: #005f73;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    padding-top: 80px; /* Compensa la altura del header fijo */
+}
+
+header {
+    background: linear-gradient(to right, #005f73, #0a9396);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #94d2bd;
+    position: fixed; /* Header fijo */
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    font-size: 1.5em;
+    font-weight: bold;
+    scroll-behavior: smooth;
+}
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+header h3 {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+nav {
+    text-align: center;
+    background-color: #0a9396;
+    padding: 10px 0;
+    border-radius: 5px;
+    z-index: 999;
+    position: fixed;
+    width: 100%; /* Ocupa todo el ancho de la ventana */
+    top: 60px;
+    margin-top: 80px; 
+}
+
+nav a {
+    margin: 0 15px;
+    font-weight: bold;
+    font-size: 1em;
+    text-decoration: none;
+    visibility: visible;
+}
+
+nav a:hover {
+    color: #ffffff; /* Texto blanco al pasar el mouse */
+    background-color: #94d2bd; /* Fondo verde agua al pasar el mouse */
+    text-decoration: none; /* Mantener sin subrayado */
+    text-decoration: underline;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.logo-container img {
+    width: 150px;
+    height: auto;
+    border: 3px solid #FFD700; /* Marco amarillo */
+    border-radius: 10px;
+}
+
+.content {
+    margin: 0;
+    padding: 1.5rem;
+    margin-top: 100px;
+}
+
+
+
+footer {
+    background: #005f73;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9em;
+    margin-top: 0px;
+}
+
+@media (max-width: 768px) {
+    header {
+        font-size: 1.2em;
+    }
+
+    nav a {
+        display: block;
+        margin: 5px 0;
+    }
+
+    section {
+        padding: 10px;
+        margin: 10px;
+    }
+} 
+
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Tarjetas responsivas */
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background-color: #292942; /* Fondo de las tarjetas */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease; /* Animación al pasar el mouse */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Efecto de elevación */
+}
+
+.card h3 {
+    font-size: 18px;
+    color: #94d2bd; /* Título en verde suave */
+    margin-bottom: 10px;
+}
+
+.card .value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #00ff6a; /* Valor destacado */
+}
+
+.card .details p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.card .details span {
+    font-weight: bold;
+    color: #00b4d8; /* Resalta los valores */
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr; /* Una tarjeta por fila en dispositivos pequeños */
+    }
+}
