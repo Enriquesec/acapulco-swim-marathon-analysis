@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const links = document.querySelectorAll('nav a'); // Selecciona todos los enlaces del nav
+    const links = document.querySelectorAll('nav a[data-target]'); // Selecciona todos los enlaces del nav
+    const navContainer = document.getElementById('navbar-container');
     const contentDiv = document.getElementById('content'); // Contenedor donde se cargará el contenido
     
     const loadContent = async (targetFile) => {
@@ -12,6 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 initializeCharts(); // Llama a una función para inicializar los gráficos
                 initializeEventListeners(); // Llama a una función para los nuevos listeners
                 initializeSwiper(); // Llama a una función para inicializar el carrusel
+
+                // Actualizar el estado activo de los enlaces
+                links.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-target') === targetFile) {
+                        link.classList.add('active');
+                    }
+                });
             } else {
                 contentDiv.innerHTML = `<p>Error ${response.status}: No se pudo cargar el contenido.</p>`;
             }
@@ -32,12 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
     loadContent('inicio.html');
 
     // Efecto de scroll en la barra de navegación
-    const navContainer = document.getElementById('navbar-container');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 10) {
             navContainer.querySelector('.main-nav').classList.add('scrolled');
         } else {
             navContainer.querySelector('.main-nav').classList.remove('scrolled');
+        }
+    });
+
+    // Delegación de eventos para botones cargados dinámicamente
+    document.addEventListener('click', (event) => {
+        // Comprobar si el clic fue en el botón de "Ver Convocatoria Completa"
+        if (event.target.matches('a[data-target="convocatoria.html"]')) {
+            event.preventDefault();
+            loadContent('convocatoria.html');
         }
     });
 });
@@ -109,15 +126,6 @@ function initializeEventListeners() {
 
     // Configurar la página de resultados si los elementos existen
     setupResultsPage();
-
-    // Añadir listener para el botón de convocatoria en la página de inicio
-    const ctaButton = document.querySelector('a[data-target="convocatoria.html"]');
-    if (ctaButton) {
-        ctaButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            loadContent(ctaButton.getAttribute('data-target'));
-        });
-    }
 }
 
 function initializeCharts() {
