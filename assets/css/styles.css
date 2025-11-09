@@ -9,10 +9,6 @@ html, body {
     font-family: 'Roboto', sans-serif;
 }
 
-body {
-    padding-top: 80px; /* Compensa la altura del header fijo */
-}
-
 header {
     background: linear-gradient(to right, #005f73, #0a9396);
     color: white;
@@ -37,15 +33,12 @@ header h3 {
 }
 
 nav {
-    text-align: center;
-    background-color: #0a9396;
-    padding: 10px 0;
-    border-radius: 5px;
+    /* Tailwind classes are used in index.html, so these are not needed */
+    /* text-align: center; */
+    /* background-color: #0a9396; */
+    /* padding: 10px 0; */
     z-index: 999;
-    position: fixed;
     width: 100%; /* Ocupa todo el ancho de la ventana */
-    top: 60px;
-    margin-top: 80px; 
 }
 
 nav a {
@@ -78,8 +71,7 @@ nav a:hover {
 
 .content {
     margin: 0;
-    padding: 1.5rem;
-    margin-top: 100px;
+    padding: 1.5rem; /* p-6 from Tailwind */
 }
 
 

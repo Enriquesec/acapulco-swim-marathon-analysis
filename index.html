@@ -10,30 +10,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <header>
-        <h1>Maratón Internacional Acapulco</h1>
-        <h3>Virgen de Guadalupe Reina De Los Mares</h3>
-        <h3>Aguas Abiertas</h3>
-    </header>
-    <nav class="bg-teal-700 p-2">
-        <a data-target="inicio.html">Inicio</a>
-        <a data-target="cronologia.html">Cronología</a>
-        <a data-target="resultados.html">Resultados</a>
-        <a data-target="convocatoria.html">Convocatoria</a>
-        <a data-target="sobre.html">Sobre el maratón</a>
-    </nav>
-    <div id="content" class="content bg-gray-900 p-6 text-white min-h-[100vh] lg:min-h-[120vh]">
-        <p>
-            Somos un grupo conformado por nadadores, profesores y gente entusiasta que gusta de los eventos en aguas abiertas. Ofrecemos un evento como ninguno otro en el territorio nacional, tanto por su gran convocatoria como por su devoción a la Reina de los Mares…. Aquí un poco de historia.
-        </p>
-        <p>
-            A casi seis décadas de existencia, el Maratón Guadalupano, cumple éste próximo Diciembre 59 años de celebrarse de manera ininterrumpida. Con el paso de los años se ha convertido en el evento de aguas abiertas con mas tradición en México, además de ser el que convoca el mayor número de competidores tanto para nadar las aguas de la Bahía de Santa Lucía como por la devoción y fé a la Virgen de Guadalupe.
-        </p>
-        <p>
-            Te invitamos a seguir escribiendo con nosotros esta historia de retos e ilusiones que por más de 58 años se han fraguado en nuestros nadadores.
-        </p>
-    </div>
+<body class="bg-gray-900">
+    <div class="sticky top-0 z-50">
+        <header>
+            <h1>Maratón Internacional Acapulco</h1>
+            <h3>Virgen de Guadalupe Reina De Los Mares</h3>
+            <h3>Aguas Abiertas</h3>
+        </header>
+        <nav class="bg-teal-700 p-2 flex justify-center">
+            <a data-target="inicio.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Inicio</a>
+            <a data-target="cronologia.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Cronología</a>
+            <a data-target="resultados.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Resultados</a>
+            <a data-target="convocatoria.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Convocatoria</a>
+            <a data-target="sobre.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Sobre el maratón</a>
+        </nav>
+    </div> 
+    <div id="content" class="content bg-gray-900 p-6 text-white min-h-[100vh] lg:min-h-[120vh]"></div>
     <footer>
         <p>&copy; 2024 Maratón Internacional Acapulco | Diseñado por Enrique Santibáñez Cortés</p>
     </footer>
