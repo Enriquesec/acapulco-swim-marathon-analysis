@@ -6,32 +6,41 @@
     <title>Maratón Internacional Acapulco</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/styles.css">
-    <!-- Swiper.js CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <!-- Swiper.js CSS (UMD version) -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
     <script src="./assets/js/scripts.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-900 text-white">
-    <div class="sticky top-0 z-50">
-        <header>
-            <h1>Maratón Internacional Acapulco</h1>
-            <h3>Virgen de Guadalupe Reina De Los Mares</h3>
-            <h3>Aguas Abiertas</h3>
-        </header>
-        <nav class="bg-teal-700 p-2 flex justify-center">
-            <a data-target="inicio.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Inicio</a> 
-            <a data-target="cronologia.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Cronología</a> 
-            <a data-target="resultados.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Resultados</a> 
-            <a data-target="convocatoria.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Convocatoria</a> 
-            <a data-target="sobre.html" class="mx-4 text-white font-bold hover:underline cursor-pointer">Sobre el maratón</a> 
+    <div class="sticky top-0 z-50" id="navbar-container">
+        <nav class="main-nav">
+            <div class="nav-title">Maratón Acapulco</div>
+            <a data-target="inicio.html" class="mx-4 text-white font-bold cursor-pointer">Inicio</a> 
+            <a data-target="cronologia.html" class="mx-4 text-white font-bold cursor-pointer">Cronología</a> 
+            <a data-target="resultados.html" class="mx-4 text-white font-bold cursor-pointer">Resultados</a> 
+            <a data-target="convocatoria.html" class="mx-4 text-white font-bold cursor-pointer">Convocatoria</a> 
+            <a data-target="sobre.html" class="mx-4 text-white font-bold cursor-pointer">Sobre el maratón</a> 
         </nav>
     </div> 
     <div id="content" class="content p-6"></div>
     <footer>
-        <p>&copy; 2024 Maratón Internacional Acapulco | Diseñado por Enrique Santibáñez Cortés</p>
+        <div class="contact-info">
+            <p>Acapulco, Acapulco, Mexico</p>
+            <p>55 3438 1749</p>
+            <p><a href="mailto:eventos@maratonacapulco.mx">eventos@maratonacapulco.mx</a></p>
+        </div>
+        <div class="social-links">
+            <a href="https://www.facebook.com/MaratonAcapulco" target="_blank" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06c0 5.02 3.66 9.18 8.44 9.92v-7.01H8.05V12.06h2.39V9.95c0-2.38 1.42-3.69 3.58-3.69 1.03 0 2.1.18 2.1.18v2.45h-1.29c-1.18 0-1.55.73-1.55 1.48v1.7h2.78l-.45 2.9h-2.33v7.01c4.78-.74 8.44-4.9 8.44-9.92C22 6.53 17.5 2.04 12 2.04z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/maratonacapulco/" target="_blank" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2c2.72 0 3.05.01 4.12.06 1.06.05 1.79.22 2.42.47.65.25 1.13.59 1.59 1.05.46.46.8 1 1.05 1.59.25.63.42 1.36.47 2.42.05 1.07.06 1.4.06 4.12s-.01 3.05-.06 4.12c-.05 1.06-.22 1.79-.47 2.42a4.9 4.9 0 01-1.05 1.59c-.46.46-1 .8-1.59 1.05-.63.25-1.36.42-2.42.47-1.07.05-1.4.06-4.12.06s-3.05-.01-4.12-.06c-1.06-.05-1.79-.22-2.42-.47a4.9 4.9 0 01-1.59-1.05c-.46-.46-.8-1-1.05-1.59-.25-.63-.42-1.36-.47-2.42C2.01 15.05 2 14.72 2 12s.01-3.05.06-4.12c.05-1.06.22-1.79.47-2.42.25-.65.59-1.13 1.05-1.59.46-.46 1-.8 1.59-1.05.63-.25 1.36-.42 2.42-.47C8.95 2.01 9.28 2 12 2zm0 1.8c-2.67 0-2.99.01-4.04.06-1.03.05-1.6.2-2.02.37-.47.18-.82.43-1.19.8-.37.37-.62.72-.8 1.19-.17.42-.32.99-.37 2.02C3.81 9.01 3.8 9.33 3.8 12s.01 2.99.06 4.04c.05 1.03.2 1.6.37 2.02.18.47.43.82.8 1.19.37.37.72.62 1.19.8.42.17.99.32 2.02.37 1.05.05 1.37.06 4.04.06s2.99-.01 4.04-.06c1.03-.05 1.6-.2 2.02-.37.47-.18.82-.43 1.19-.8.37-.37.62-.72.8-1.19.17-.42.32-.99.37-2.02.05-1.05.06-1.37.06-4.04s-.01-2.99-.06-4.04c-.05-1.03-.2-1.6-.37-2.02a3.09 3.09 0 00-.8-1.19c-.37-.37-.72-.62-1.19-.8-.42-.17-.99-.32-2.02-.37C14.99 3.81 14.67 3.8 12 3.8zm0 3.35c-2.4 0-4.35 1.95-4.35 4.35s1.95 4.35 4.35 4.35 4.35-1.95 4.35-4.35-1.95-4.35-4.35-4.35zm0 7.2c-1.57 0-2.85-1.28-2.85-2.85S10.43 9.15 12 9.15s2.85 1.28 2.85 2.85-1.28 2.85-2.85 2.85zm4.9-7.55a1.2 1.2 0 110-2.4 1.2 1.2 0 010 2.4z"/></svg>
+            </a>
+        </div>
+        <p class="mt-4">&copy; 2024 Maratón Internacional Acapulco | Diseñado por Enrique Santibáñez Cortés</p>
     </footer>
-    <!-- Swiper.js JS -->
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <!-- Swiper.js JS (UMD version) -->
+    <script src="https://unpkg.com/swiper@8/swiper-bundle.umd.min.js"></script>
 </body>
 </html>

@@ -1,69 +1,67 @@
 html, body {
     margin: 0;
     padding: 0;
-    min-height: 100%; /* Asegura que el contenido ocupe toda la altura */
-    display: flex;
-    flex-direction: column;
     font-family: 'Roboto', sans-serif;
-}
-
-header {
-    background: #1a202c; /* Coincide con bg-gray-900 */
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 1.5em;
-    font-weight: bold;
+    background-color: #1a202c; /* bg-gray-900 */
     scroll-behavior: smooth;
 }
-header h1 {
-    margin: 0;
-    font-size: 24px;
-}
-header h3 {
-    margin: 5px 0;
-    font-size: 16px;
+
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: transparent;
+    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-nav {
-    /* Tailwind classes are used in index.html, so these are not needed */
-    /* text-align: center; */
-    /* background-color: #0a9396; */
-    /* padding: 10px 0; */
-    z-index: 999;
-    width: 100%; /* Ocupa todo el ancho de la ventana */
+.main-nav.scrolled {
+    background-color: rgba(26, 32, 44, 0.8); /* bg-gray-900 con transparencia */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2d3748; /* bg-gray-800 */
+}
+
+.nav-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
 }
 
 nav a {
-    margin: 0 15px;
+    color: #cbd5e0; /* text-gray-400 */
+    margin: 0 1rem;
     font-weight: bold;
-    font-size: 1em;
     text-decoration: none;
-    visibility: visible;
+    position: relative;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease;
 }
 
 nav a:hover {
-    color: #ffffff;
-    background-color: #007b5e; /* Un verde más oscuro para el hover */
-    text-decoration: none; /* Mantener sin subrayado */
-    text-decoration: underline;
+    color: white;
 }
 
-.logo-container {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: #48bb78; /* text-green-400 */
+    transition: all 0.3s ease;
 }
 
-.logo-container img {
-    width: 150px;
-    height: auto;
-    border: 3px solid #FFD700; /* Marco amarillo */
-    border-radius: 10px;
+nav a:hover::after {
+    width: 100%;
+    left: 0;
 }
 
 .content {
-    margin: 0;
+    padding: 0; /* El padding se manejará en las secciones internas */
 }
 
 
@@ -72,33 +70,45 @@ footer {
     background: #1a202c; /* Coincide con bg-gray-900 */
     color: white;
     text-align: center;
-    padding: 10px;
+    padding: 2rem 1rem;
     font-size: 0.9em;
     margin-top: 0px;
+    border-top: 1px solid #2d3748; /* bg-gray-800 */
 }
 
-@media (max-width: 768px) {
-    header {
-        font-size: 1.2em;
-    }
+.contact-info {
+    margin-bottom: 1.5rem;
+    color: #a0aec0; /* text-gray-500 */
+}
 
-    nav a {
-        display: block;
-        margin: 5px 0;
-    }
+.contact-info p {
+    margin: 0.25rem 0;
+}
 
-    section {
-        padding: 10px;
-        margin: 10px;
-    }
-} 
+.contact-info a {
+    color: #a0aec0; /* text-gray-500 */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
 
+.contact-info a:hover {
+    color: #48bb78; /* text-green-400 */
+}
 
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Tarjetas responsivas */
-    gap: 20px;
-    padding: 20px;
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.social-links a {
+    color: #a0aec0; /* text-gray-500 */
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #48bb78; /* text-green-400 */
 }
 
 .card {
@@ -142,8 +152,30 @@ footer {
     }
 }
 
+/* Hero Section */
+.hero-section {
+    height: 70vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://www.maratonacapulco.mx/wp-content/uploads/2024/12/Banner-maraton-66-1024x368.jpeg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+.hero-content {
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.hero-content h1, .hero-content p {
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
 /* Estilos para el carrusel de eventos */
-.swiper-container {
+.swiper {
     width: 100%;
     padding-top: 20px;
     padding-bottom: 50px; /* Espacio para los botones de navegación */

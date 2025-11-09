@@ -30,6 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carga el contenido inicial
     loadContent('inicio.html');
+
+    // Efecto de scroll en la barra de navegación
+    const navContainer = document.getElementById('navbar-container');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+            navContainer.querySelector('.main-nav').classList.add('scrolled');
+        } else {
+            navContainer.querySelector('.main-nav').classList.remove('scrolled');
+        }
+    });
 });
 
 async function setupResultsPage() {
@@ -117,6 +127,13 @@ function initializeCharts() {
 
 function initializeSwiper() {
     const swiperContainer = document.querySelector('.swiper');
+
+    // Si la librería Swiper no se ha cargado todavía, espera un poco y vuelve a intentarlo.
+    if (typeof Swiper === 'undefined') {
+        setTimeout(initializeSwiper, 100); // Reintentar después de 100ms
+        return;
+    }
+
     if (swiperContainer) {
         new Swiper(swiperContainer, {
             // Opciones de Swiper
