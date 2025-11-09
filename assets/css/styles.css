@@ -2,23 +2,16 @@ html, body {
     margin: 0;
     padding: 0;
     min-height: 100%; /* Asegura que el contenido ocupe toda la altura */
-    display: flex; /* Permite que el footer se pegue al final */
+    display: flex;
     flex-direction: column;
-    background: #f8faff; /* Fondo muy claro, casi blanco */
-    color: #333; /* Texto principal en gris oscuro para legibilidad */
     font-family: 'Roboto', sans-serif;
 }
 
 header {
-    background: #1e90ff; /* Azul vibrante para el encabezado */
+    background: #1a202c; /* Coincide con bg-gray-900 */
     color: white;
     text-align: center;
     padding: 20px;
-    border-bottom: 2px solid #94d2bd;
-    position: fixed; /* Header fijo */
-    top: 0;
-    width: 100%;
-    z-index: 1000;
     font-size: 1.5em;
     font-weight: bold;
     scroll-behavior: smooth;
@@ -51,7 +44,7 @@ nav a {
 
 nav a:hover {
     color: #ffffff;
-    background-color: #4682b4; /* Azul acero sutil para el hover */
+    background-color: #007b5e; /* Un verde más oscuro para el hover */
     text-decoration: none; /* Mantener sin subrayado */
     text-decoration: underline;
 }
@@ -71,13 +64,12 @@ nav a:hover {
 
 .content {
     margin: 0;
-    padding: 1.5rem; /* p-6 from Tailwind */
 }
 
 
 
 footer {
-    background: #1e90ff; /* Coincide con el encabezado */
+    background: #1a202c; /* Coincide con bg-gray-900 */
     color: white;
     text-align: center;
     padding: 10px;
@@ -110,28 +102,28 @@ footer {
 }
 
 .card {
-    background-color: #ffffff; /* Fondo blanco para las tarjetas */
+    background-color: #2d3748; /* Coincide con bg-gray-800 */
     border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra mucho más sutil */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
     padding: 20px;
     text-align: center;
     transition: transform 0.2s ease; /* Animación al pasar el mouse */
 }
 
 .card:hover {
-    transform: translateY(-3px); /* Efecto de elevación más sutil */
+    transform: translateY(-5px); /* Efecto de elevación */
 }
 
 .card h3 {
     font-size: 18px;
-    color: #1e90ff; /* Azul vibrante para los títulos de las tarjetas */
+    color: #48bb78; /* Coincide con text-green-400 */
     margin-bottom: 10px;
 }
 
 .card .value {
     font-size: 28px;
     font-weight: bold;
-    color: #007bff; /* Azul para valores destacados */
+    color: #38a169; /* Coincide con text-green-500 */
 }
 
 .card .details p {
@@ -141,11 +133,99 @@ footer {
 
 .card .details span {
     font-weight: bold; 
-    color: #4682b4; /* Azul acero para resaltar detalles */
+    color: #3182ce; /* Coincide con text-blue-400 */
 }
 
 @media (max-width: 768px) {
     .dashboard {
         grid-template-columns: 1fr; /* Una tarjeta por fila en dispositivos pequeños */
     }
+}
+
+/* Estilos para el carrusel de eventos */
+.swiper-container {
+    width: 100%;
+    padding-top: 20px;
+    padding-bottom: 50px; /* Espacio para los botones de navegación */
+}
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-card {
+    position: relative;
+    width: 250px; /* Ancho de la tarjeta */
+    height: 250px; /* Altura de la tarjeta (cuadrada) */
+    background-color: #2d3748; /* bg-gray-800 */
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.event-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra el espacio */
+}
+
+.event-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6); /* Fondo semitransparente para el texto */
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Personalizar colores de los botones de navegación de Swiper */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #48bb78; /* text-green-400 */
+}
+
+/* Estilos para el visor de PDF */
+.pdf-viewer-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Ancho máximo para el visor en pantallas grandes */
+    margin: 0 auto; /* Centrar el contenedor */
+    height: 100vh; /* Altura del 100% de la ventana visible */
+    border: 1px solid #4a5568; /* bg-gray-700 */
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pdf-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Estilos para la galería */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.gallery-item {
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
 }
