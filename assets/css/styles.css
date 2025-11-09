@@ -2,15 +2,15 @@ html, body {
     margin: 0;
     padding: 0;
     min-height: 100%; /* Asegura que el contenido ocupe toda la altura */
-    display: flex;
-    flex-direction: column; /* Ordena los hijos en columna */
-    background: linear-gradient(to bottom, #0a9396, #94d2bd); /* Fondo de la página */
-    color: #005f73;
+    display: flex; /* Permite que el footer se pegue al final */
+    flex-direction: column;
+    background: #f8faff; /* Fondo muy claro, casi blanco */
+    color: #333; /* Texto principal en gris oscuro para legibilidad */
     font-family: 'Roboto', sans-serif;
 }
 
 header {
-    background: linear-gradient(to right, #005f73, #0a9396);
+    background: #1e90ff; /* Azul vibrante para el encabezado */
     color: white;
     text-align: center;
     padding: 20px;
@@ -50,8 +50,8 @@ nav a {
 }
 
 nav a:hover {
-    color: #ffffff; /* Texto blanco al pasar el mouse */
-    background-color: #94d2bd; /* Fondo verde agua al pasar el mouse */
+    color: #ffffff;
+    background-color: #4682b4; /* Azul acero sutil para el hover */
     text-decoration: none; /* Mantener sin subrayado */
     text-decoration: underline;
 }
@@ -77,8 +77,8 @@ nav a:hover {
 
 
 footer {
-    background: #005f73;
-    color: #ffffff;
+    background: #1e90ff; /* Coincide con el encabezado */
+    color: white;
     text-align: center;
     padding: 10px;
     font-size: 0.9em;
@@ -110,28 +110,28 @@ footer {
 }
 
 .card {
-    background-color: #292942; /* Fondo de las tarjetas */
+    background-color: #ffffff; /* Fondo blanco para las tarjetas */
     border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra mucho más sutil */
     padding: 20px;
     text-align: center;
     transition: transform 0.2s ease; /* Animación al pasar el mouse */
 }
 
 .card:hover {
-    transform: translateY(-5px); /* Efecto de elevación */
+    transform: translateY(-3px); /* Efecto de elevación más sutil */
 }
 
 .card h3 {
     font-size: 18px;
-    color: #94d2bd; /* Título en verde suave */
+    color: #1e90ff; /* Azul vibrante para los títulos de las tarjetas */
     margin-bottom: 10px;
 }
 
 .card .value {
     font-size: 28px;
     font-weight: bold;
-    color: #00ff6a; /* Valor destacado */
+    color: #007bff; /* Azul para valores destacados */
 }
 
 .card .details p {
@@ -140,8 +140,8 @@ footer {
 }
 
 .card .details span {
-    font-weight: bold;
-    color: #00b4d8; /* Resalta los valores */
+    font-weight: bold; 
+    color: #4682b4; /* Azul acero para resaltar detalles */
 }
 
 @media (max-width: 768px) {
