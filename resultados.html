@@ -1,15 +1,61 @@
-<div class="container mx-auto text-center">
+<div class="container mx-auto text-center pt-12">
     <h2 class="text-3xl font-bold text-green-400 mb-6">Busca tus Resultados Históricos</h2>
     <p class="mb-6">Ingresa tu nombre para ver todos tus resultados a lo largo de los años.</p>
 
     <!-- Campo de Búsqueda -->
-    <div class="mb-8">
-        <input 
-            type="text" 
-            id="searchInput"
-            placeholder="Ingresa tu nombre completo..." 
-            class="w-full max-w-lg p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-        />
+    <!-- Barra de Herramientas de Resultados -->
+    <div class="filter-bar p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Buscador -->
+            <div class="lg:col-span-2">
+                <label class="block text-gray-400 text-sm mb-2" for="searchInput">Buscar por nombre</label>
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Ej. Juan Pérez..."
+                        class="w-full p-3 pl-10 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition-all" />
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Filtro Año -->
+            <div>
+                <label class="block text-gray-400 text-sm mb-2" for="filterYear">Año</label>
+                <select id="filterYear"
+                    class="w-full p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer">
+                    <option value="">Todos</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+
+            <!-- Filtro Distancia -->
+            <div>
+                <label class="block text-gray-400 text-sm mb-2" for="filterDistance">Distancia</label>
+                <select id="filterDistance"
+                    class="w-full p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer">
+                    <option value="">Todas</option>
+                    <option value="1km">1km</option>
+                    <option value="5km">5km</option>
+                    <option value="10km">10km</option>
+                </select>
+            </div>
+
+            <!-- Filtro Género -->
+            <div>
+                <label class="block text-gray-400 text-sm mb-2" for="filterGender">Género</label>
+                <select id="filterGender"
+                    class="w-full p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer">
+                    <option value="">Todos</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- Contenedor para mostrar los resultados -->

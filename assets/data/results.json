@@ -1,0 +1,82 @@
+[
+    {
+        "year": 2023,
+        "name": "Juan Pérez",
+        "gender": "Masculino",
+        "category": "Master B (30-34 años)",
+        "distance": "5km",
+        "time": "01:15:30",
+        "position_category": 5,
+        "position_general": 45
+    },
+    {
+        "year": 2023,
+        "name": "Maria Garcia",
+        "gender": "Femenino",
+        "category": "Master A (25-29 años)",
+        "distance": "5km",
+        "time": "01:10:15",
+        "position_category": 1,
+        "position_general": 22
+    },
+    {
+        "year": 2022,
+        "name": "Juan Pérez",
+        "gender": "Masculino",
+        "category": "Master B (30-34 años)",
+        "distance": "5km",
+        "time": "01:18:45",
+        "position_category": 8,
+        "position_general": 60
+    },
+    {
+        "year": 2023,
+        "name": "Carlos López",
+        "gender": "Masculino",
+        "category": "Elite",
+        "distance": "10km",
+        "time": "02:05:10",
+        "position_category": 2,
+        "position_general": 3
+    },
+    {
+        "year": 2022,
+        "name": "Ana Torres",
+        "gender": "Femenino",
+        "category": "Juvenil (15-19 años)",
+        "distance": "1km",
+        "time": "00:18:20",
+        "position_category": 1,
+        "position_general": 15
+    },
+    {
+        "year": 2021,
+        "name": "Pedro Sánchez",
+        "gender": "Masculino",
+        "category": "Veteranos (50+ años)",
+        "distance": "5km",
+        "time": "01:45:00",
+        "position_category": 10,
+        "position_general": 120
+    },
+    {
+        "year": 2023,
+        "name": "Lucía Méndez",
+        "gender": "Femenino",
+        "category": "Elite",
+        "distance": "10km",
+        "time": "02:15:45",
+        "position_category": 4,
+        "position_general": 12
+    },
+    {
+        "year": 2020,
+        "name": "Roberto Díaz",
+        "gender": "Masculino",
+        "category": "Master C (35-39 años)",
+        "distance": "5km",
+        "time": "01:22:10",
+        "position_category": 15,
+        "position_general": 88
+    }
+]
