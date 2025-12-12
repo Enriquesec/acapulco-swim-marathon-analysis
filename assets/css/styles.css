@@ -267,10 +267,22 @@ footer {
 .chart-wrapper {
     position: relative;
     width: 100%;
-    min-height: 280px;
+    height: 320px;
 }
 
 .chart-canvas {
     width: 100% !important;
     height: 100% !important;
+}
+
+.card-compact {
+    padding: 1.5rem;
+}
+
+.chart-wrapper-small {
+    height: 200px;
+}
+
+.chart-canvas-small {
+    max-height: 200px;
 }
