@@ -1,46 +1,31 @@
-    <!-- Filtros -->
-    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 mt-0">
+    <div id="chronologyFilters" class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 mt-0">
         <h3 class="text-lg font-semibold text-green-400 mb-4">Filtros</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Filtro de Edición -->
             <div>
-                <label for="edition" class="block text-sm font-medium text-white mb-1">Edición</label>
+                <label for="edition" class="block text-sm font-medium text-white mb-1">Evento</label>
                 <select 
                     id="edition" 
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Seleccione una edición</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
-                    <option value="2021">2021</option>
+                    <option value="">Cargando eventos...</option>
                 </select>
             </div>
-
-            <!-- Filtro de Sexo -->
             <div>
                 <label for="gender" class="block text-sm font-medium text-white mb-1">Sexo</label>
                 <select 
                     id="gender" 
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Seleccione un sexo</option>
-                    <option value="male">Masculino</option>
-                    <option value="female">Femenino</option>
+                    <option value="">Cargando catálogos...</option>
                 </select>
             </div>
-
-            <!-- Filtro de Categoría -->
             <div>
-                <label for="category" class="block text-sm font-medium text-white mb-1">Categoría</label>
+                <label for="category" class="block text-sm font-medium text-white mb-1">Distancia</label>
                 <select 
                     id="category" 
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Seleccione una categoría</option>
-                    <option value="elite">Élite</option>
-                    <option value="junior">Junior</option>
-                    <option value="senior">Senior</option>
+                    <option value="">Cargando distancias...</option>
                 </select>
             </div>
         </div>
-        <!-- Botón de Aplicar Filtros -->
         <div class="mt-4 text-right">
             <button 
                 id="applyFilters" 
@@ -49,40 +34,34 @@
             </button>
         </div>
     </div>
-    <!-- Contenedor de cuadrícula -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Tarjeta estándar -->
+
+    <div id="chronologyDashboard" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Success rate</h3>
-            <p class="text-3xl font-bold mt-2 text-green-500">92.5%</p>
+            <h3 class="text-lg font-semibold text-green-400">Eventos registrados</h3>
+            <p id="chronology-events-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
         </div>
-        <!-- Tarjeta más alta (Activity) -->
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md lg:col-span-3 lg:row-span-2">
-            <h3 class="text-lg font-semibold text-green-400">Activity</h3>
-            <canvas id="activityChart" class="mt-4"></canvas> <!-- Aquí puede ir el gráfico -->
-        </div>
-        <!-- Tarjeta estándar -->
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Response times</h3>
-            <div class="mt-2 space-y-1">
-                <p>LQ: <span class="font-bold text-blue-400">75.0 ms</span></p>
-                <p>Median: <span class="font-bold text-blue-400">136.0 ms</span></p>
-                <p>UQ: <span class="font-bold text-blue-400">310.0 ms</span></p>
+            <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
+            <div class="chart-wrapper mt-4">
+                <canvas id="activityChart" class="chart-canvas"></canvas>
             </div>
         </div>
-        <!-- Tarjeta estándar -->
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Requests</h3>
-            <p class="text-3xl font-bold mt-2 text-green-500">148,815</p>
+            <h3 class="text-lg font-semibold text-green-400">Participaciones registradas</h3>
+            <p id="chronology-participants-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
         </div>
-        <!-- Tarjeta estándar -->
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Users</h3>
-            <p class="text-3xl font-bold mt-2 text-green-500">450</p>
+            <h3 class="text-lg font-semibold text-green-400">Distancias catalogadas</h3>
+            <p id="chronology-distances-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
         </div>
-        <!-- Tarjeta estándar -->
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Devices</h3>
-            <canvas id="deviceChart" class="mt-4"></canvas> <!-- Gráfico circular -->
+            <h3 class="text-lg font-semibold text-green-400">Géneros catalogados</h3>
+            <p id="chronology-genders-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
+        </div>
+        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-green-400">Participantes por distancia</h3>
+            <div class="chart-wrapper mt-4">
+                <canvas id="distanceChart" class="chart-canvas"></canvas>
+            </div>
         </div>
     </div>
