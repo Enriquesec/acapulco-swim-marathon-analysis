@@ -1,0 +1,10 @@
+{
+  "generated_at": "2025-12-12T20:49:06.228053Z",
+  "counts": {
+    "events": 3,
+    "distances": 2,
+    "genders": 2,
+    "age_groups": 7
+  },
+  "source_file": "../data/db/maraton_acapulco_participants.csv"
+}
