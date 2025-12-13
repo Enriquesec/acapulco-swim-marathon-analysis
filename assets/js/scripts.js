@@ -40,6 +40,18 @@ const parseEventInfo = (eventString = '') => {
     };
 };
 
+const buildEventKey = (eventInfo, fallback = '') => {
+    if (eventInfo?.eventId) {
+        return `${eventInfo.eventId}-${eventInfo.year || 'nd'}`;
+    }
+
+    if (eventInfo?.label) {
+        return normalizeText(`${eventInfo.label}-${eventInfo.year || ''}`);
+    }
+
+    return normalizeText(fallback);
+};
+
 const buildCompetitorKey = (id, name) => {
     if (id) return normalizeText(id);
     return normalizeText(name || '');
@@ -72,6 +84,7 @@ let oneKGenderChartInstance = null;
 let oneKAgeChartInstance = null;
 let oneKTimeChartInstance = null;
 let yearTrendChartInstance = null;
+let chronologyTimeChartInstance = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('nav a[data-target]'); // Selecciona todos los enlaces del nav
@@ -752,14 +765,21 @@ const normalizeRecordForStats = (record) => {
     const genderRaw = record.sexo || record.gender || 'No especificado';
     const gender = genderRaw.toString().trim().toUpperCase();
 
+    const eventName = record.evento || record.event || 'Evento no especificado';
+    const eventInfo = parseEventInfo(eventName);
+    const category = record.categoria || record.category || 'Categoría N/D';
+
     return {
         participantKey: buildParticipantKey(record.participant_id || record.participantId, record.nombre_completo || record.name),
         name: record.nombre_completo || record.name || 'Sin nombre',
         gender,
         ageGroup: deriveAgeGroup(record),
         distance: distanceLabel,
+        category,
+        event: eventInfo.label,
+        eventKey: buildEventKey(eventInfo, eventName),
         timeMinutes: parseResultTimeInMinutes(record),
-        year: extractYearFromEvent(record.evento || record.event || '')
+        year: eventInfo.year
     };
 };
 
@@ -815,6 +835,21 @@ const aggregateGenderDistribution = (records) => {
         acc[key] = (acc[key] || 0) + 1;
         return acc;
     }, {});
+};
+
+const summarizeGenderCounts = (records) => {
+    const distribution = aggregateGenderDistribution(records);
+    const femaleCount = Object.entries(distribution)
+        .filter(([gender]) => normalizeText(gender).startsWith('fe'))
+        .reduce((sum, [, count]) => sum + count, 0);
+
+    const maleCount = Object.entries(distribution)
+        .filter(([gender]) => normalizeText(gender).includes('var') || normalizeText(gender).startsWith('ma'))
+        .reduce((sum, [, count]) => sum + count, 0);
+
+    const total = Object.values(distribution).reduce((sum, value) => sum + value, 0);
+
+    return { femaleCount, maleCount, total };
 };
 
 const aggregateAgeDistribution = (records) => {
@@ -922,6 +957,59 @@ const renderAgeChart = (ageGroups) => {
                     labels: {
                         color: '#e2e8f0'
                     }
+                }
+            }
+        }
+    });
+};
+
+const renderChronologyAgeChart = (records) => {
+    const canvas = document.getElementById('chronologyAgeChart');
+    if (!canvas) return;
+
+    const distribution = aggregateAgeDistribution(records);
+    const labels = Object.keys(distribution);
+    if (!labels.length) {
+        canvas.replaceWith(createEmptyState('Sin datos de edad disponibles.'));
+        return;
+    }
+
+    const sortedLabels = labels.sort((a, b) => {
+        const aNum = parseInt(a, 10);
+        const bNum = parseInt(b, 10);
+        if (Number.isNaN(aNum) && Number.isNaN(bNum)) return a.localeCompare(b);
+        if (Number.isNaN(aNum)) return 1;
+        if (Number.isNaN(bNum)) return -1;
+        return aNum - bNum;
+    });
+
+    const counts = sortedLabels.map(label => distribution[label]);
+
+    if (ageDistributionChart) {
+        ageDistributionChart.destroy();
+    }
+
+    ageDistributionChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: sortedLabels,
+            datasets: [{
+                label: 'Participantes',
+                data: counts,
+                backgroundColor: '#48bb78'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#e2e8f0' }
+                },
+                x: {
+                    ticks: { color: '#e2e8f0' }
                 }
             }
         }
@@ -1153,8 +1241,63 @@ const renderOneKTimeChart = (records, statusElement) => {
     });
 };
 
+const renderChronologyTimeChart = (records, statusElement) => {
+    const canvas = document.getElementById('chronologyTimeChart');
+    if (!canvas) return;
+
+    const validTimes = records
+        .map(record => record.timeMinutes)
+        .filter(value => typeof value === 'number' && !Number.isNaN(value));
+
+    if (chronologyTimeChartInstance) {
+        chronologyTimeChartInstance.destroy();
+        chronologyTimeChartInstance = null;
+    }
+
+    if (!validTimes.length) {
+        if (statusElement) {
+            statusElement.textContent = 'Sin tiempos registrados para los filtros seleccionados.';
+            statusElement.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (statusElement) {
+        statusElement.textContent = '';
+        statusElement.classList.add('hidden');
+    }
+
+    const histogram = buildTimeHistogram(validTimes, 5);
+
+    chronologyTimeChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: histogram.labels,
+            datasets: [{
+                label: 'Participantes',
+                data: histogram.counts,
+                backgroundColor: '#9f7aea'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#e2e8f0' }
+                },
+                x: {
+                    ticks: { color: '#e2e8f0', maxRotation: 45, minRotation: 45 }
+                }
+            }
+        }
+    });
+};
+
 const renderYearTrendChart = (data) => {
-    const canvas = document.getElementById('yearTrendChart');
+    const canvas = document.getElementById('chronologyTrendChart');
     if (!canvas) return;
 
     if (yearTrendChartInstance) {
@@ -1206,23 +1349,14 @@ const createEmptyState = (message) => {
 };
 
 async function initializeChronology() {
-    const dashboard = document.getElementById('chronologyDashboard');
-    if (!dashboard) return;
+    const summaryElement = document.getElementById('summary-events');
+    if (!summaryElement) return;
 
     try {
-        const [
-            indexData,
-            events,
-            distances,
-            genders,
-            ageGroups,
-            rawResults
-        ] = await Promise.all([
-            fetchJson('./assets/data/index.json'),
+        const [events, distances, genders, rawResults] = await Promise.all([
             fetchJson('./assets/data/events.json'),
             fetchJson('./assets/data/distances.json'),
             fetchJson('./assets/data/genders.json'),
-            fetchJson('./assets/data/age_groups.json'),
             fetchJson('./assets/data/history_results.json')
         ]);
 
@@ -1230,102 +1364,77 @@ async function initializeChronology() {
             .map(normalizeRecordForStats)
             .filter(Boolean);
 
-        const uniqueParticipantsData = aggregateUniqueParticipantsByDistance(normalizedRecords);
-        renderDistanceParticipantsChart(uniqueParticipantsData);
-
-        const genderDistribution = aggregateGenderDistribution(normalizedRecords);
-        genderSummaryChartInstance = renderGenderSummaryChart(genderDistribution, 'genderSummaryChart', genderSummaryChartInstance);
-
+        const { femaleCount, maleCount, total } = summarizeGenderCounts(normalizedRecords);
         const totalUniqueParticipants = new Set(normalizedRecords.map(record => record.participantKey)).size;
-        setTextContent('chronology-participants-count', totalUniqueParticipants || '0');
 
-        const yearlyData = aggregateParticipantsByYear(normalizedRecords);
-        renderYearTrendChart(yearlyData);
+        setTextContent('summary-events', events.length || '0');
+        setTextContent('summary-participants', totalUniqueParticipants || '0');
+        setTextContent('summary-female', femaleCount || '0');
+        setTextContent('summary-male', maleCount || '0');
 
-        const oneKRecords = normalizedRecords.filter(record => record.distance === '1K');
-        const oneKParticipantsSet = new Set(oneKRecords.map(record => record.participantKey));
-        setTextContent('oneKParticipantsCount', oneKParticipantsSet.size || '0');
+        const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
+        const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
+        setTextContent('summary-1k', oneKParticipants || '0');
+        setTextContent('summary-5k', fiveKParticipants || '0');
 
-        const oneKGenderDistribution = aggregateGenderDistribution(oneKRecords);
-        oneKGenderChartInstance = renderGenderSummaryChart(oneKGenderDistribution, 'oneKGenderChart', oneKGenderChartInstance);
+        renderChronologyAgeChart(normalizedRecords);
+        renderYearTrendChart(aggregateParticipantsByYear(normalizedRecords));
 
-        const oneKAgeDistribution = aggregateAgeDistribution(oneKRecords);
-        renderOneKAgeChart(oneKAgeDistribution);
+        const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.category))).filter(Boolean).sort();
+        const eventOptions = events.map(event => {
+            const info = parseEventInfo(event.name);
+            return { value: buildEventKey(info, event.name), label: info.label };
+        });
 
-        const oneKGenderFilter = document.getElementById('oneKGenderFilter');
-        const oneKAgeFilter = document.getElementById('oneKAgeFilter');
-        const oneKTimeStatus = document.getElementById('oneKTimeStatus');
+        populateSelect('chronologyEventFilter', eventOptions, 'Todos', option => option.value, option => option.label);
+        populateSelect('chronologyGenderFilter', genders, 'Todos', gender => gender.raw, gender => gender.raw);
+        populateSelect('chronologyCategoryFilter', uniqueCategories, 'Todos', value => value, value => value);
+        populateSelect('chronologyDistanceFilter', distances, 'Todos', distance => distance.label, distance => `${distance.label} (${distance.km} km)`);
 
-        if (oneKRecords.length > 0) {
-            const genderOptions = Array.from(new Set(oneKRecords.map(record => record.gender))).filter(Boolean).sort();
-            populateSelect(
-                'oneKGenderFilter',
-                genderOptions.map(value => ({ value, label: value })),
-                'Todos los géneros',
-                option => option.value,
-                option => option.label
-            );
+        const eventSelect = document.getElementById('chronologyEventFilter');
+        const genderSelect = document.getElementById('chronologyGenderFilter');
+        const categorySelect = document.getElementById('chronologyCategoryFilter');
+        const distanceSelect = document.getElementById('chronologyDistanceFilter');
+        const applyButton = document.getElementById('applyChronologyFilters');
+        const timeStatus = document.getElementById('chronologyTimeStatus');
 
-            const ageOptions = Array.from(new Set(oneKRecords.map(record => record.ageGroup))).filter(Boolean).sort();
-            populateSelect(
-                'oneKAgeFilter',
-                ageOptions.map(value => ({ value, label: value })),
-                'Todas las edades',
-                option => option.value,
-                option => option.label
-            );
-        } else {
-            if (oneKGenderFilter) {
-                oneKGenderFilter.innerHTML = '<option value="">Sin datos disponibles</option>';
-                oneKGenderFilter.disabled = true;
-            }
-            if (oneKAgeFilter) {
-                oneKAgeFilter.innerHTML = '<option value="">Sin datos disponibles</option>';
-                oneKAgeFilter.disabled = true;
-            }
-        }
+        const applyFilters = () => {
+            const eventValue = eventSelect ? eventSelect.value : '';
+            const genderValue = genderSelect ? normalizeText(genderSelect.value) : '';
+            const categoryValue = categorySelect ? categorySelect.value : '';
+            const distanceValue = distanceSelect ? distanceSelect.value : '';
 
-        const applyOneKFilters = () => {
-            if (!oneKRecords.length) {
-                renderOneKTimeChart([], oneKTimeStatus);
-                return;
-            }
-
-            const genderValue = oneKGenderFilter ? normalizeText(oneKGenderFilter.value) : '';
-            const ageValue = oneKAgeFilter ? oneKAgeFilter.value : '';
-
-            const filtered = oneKRecords.filter(record => {
-                const genderMatches = !genderValue || normalizeText(record.gender) === genderValue;
-                const ageMatches = !ageValue || record.ageGroup === ageValue;
-                return genderMatches && ageMatches;
+            const filtered = normalizedRecords.filter(record => {
+                const matchesEvent = !eventValue || record.eventKey === eventValue;
+                const matchesGender = !genderValue || normalizeText(record.gender) === genderValue;
+                const matchesCategory = !categoryValue || record.category === categoryValue;
+                const matchesDistance = !distanceValue || record.distance === distanceValue;
+                return matchesEvent && matchesGender && matchesCategory && matchesDistance;
             });
 
-            renderOneKTimeChart(filtered, oneKTimeStatus);
+            const genderCounts = summarizeGenderCounts(filtered);
+            const uniqueParticipants = new Set(filtered.map(record => record.participantKey)).size;
+
+            setTextContent('filtered-participants', uniqueParticipants || '0');
+            setTextContent('filtered-female', genderCounts.femaleCount || '0');
+            setTextContent('filtered-male', genderCounts.maleCount || '0');
+
+            renderChronologyTimeChart(filtered, timeStatus);
         };
 
-        if (oneKGenderFilter) {
-            oneKGenderFilter.addEventListener('change', applyOneKFilters);
+        [eventSelect, genderSelect, categorySelect, distanceSelect].forEach(select => {
+            if (select) {
+                select.addEventListener('change', applyFilters);
+            }
+        });
+
+        if (applyButton) {
+            applyButton.addEventListener('click', applyFilters);
         }
 
-        if (oneKAgeFilter) {
-            oneKAgeFilter.addEventListener('change', applyOneKFilters);
-        }
-
-        applyOneKFilters();
-
-        populateSelect('edition', events, 'Selecciona un evento', event => event.name, event => event.name);
-        populateSelect('gender', genders, 'Selecciona un sexo', gender => gender.raw, gender => gender.raw);
-        populateSelect('category', distances, 'Selecciona una distancia', distance => distance.label, distance => `${distance.label} (${distance.km} km)`);
-
-        const counts = indexData?.counts || {};
-        setTextContent('chronology-events-count', counts.events || events.length);
-        setTextContent('chronology-distances-count', counts.distances || distances.length);
-        setTextContent('chronology-genders-count', counts.genders || genders.length);
-
-        renderAgeChart(ageGroups);
-        renderDistanceChart(normalizedRecords);
+        applyFilters();
     } catch (error) {
         console.error('Error al inicializar cronología:', error);
-        dashboard.insertAdjacentElement('beforebegin', createEmptyState('No se pudieron cargar los datos de cronología.'));
+        summaryElement.insertAdjacentElement('beforebegin', createEmptyState('No se pudieron cargar los datos de cronología.'));
     }
 }

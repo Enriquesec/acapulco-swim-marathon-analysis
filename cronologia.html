@@ -7,148 +7,120 @@
         </div>
     </header>
 
-    <div id="chronologyHighlights" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Participantes únicos por distancia</h3>
-            <p class="text-sm text-gray-400 mt-1">Atletas distintos registrados en cada trayecto.</p>
-            <div class="chart-wrapper chart-wrapper-small mt-4">
-                <canvas id="distanceParticipantsChart" class="chart-canvas chart-canvas-small"></canvas>
-            </div>
-        </div>
-        <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Distribución por género</h3>
-            <p class="text-sm text-gray-400 mt-1">Balance general entre ramas femenil y varonil.</p>
-            <div class="chart-wrapper chart-wrapper-small mt-4">
-                <canvas id="genderSummaryChart" class="chart-canvas chart-canvas-small"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div id="yearTrendCard" class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold text-green-400">Participantes únicos por año</h3>
-        <p class="text-sm text-gray-400 mt-1">Comparativo histórico del total de nadadores registrados en cada edición.</p>
-        <div class="chart-wrapper mt-4">
-            <canvas id="yearTrendChart" class="chart-canvas"></canvas>
-        </div>
-    </div>
-
-    <div id="chronologyFilters" class="bg-gray-800 p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold text-green-400 mb-4">Filtros</h3>
+    <section aria-label="Resumen general" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-                <label for="edition" class="block text-sm font-medium text-white mb-1">Evento</label>
-                <select
-                    id="edition"
-                    class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Cargando eventos...</option>
-                </select>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Eventos registrados</p>
+                <p id="summary-events" class="text-3xl font-bold text-green-500 mt-1">—</p>
             </div>
-            <div>
-                <label for="gender" class="block text-sm font-medium text-white mb-1">Sexo</label>
-                <select
-                    id="gender"
-                    class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Cargando catálogos...</option>
-                </select>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Participantes únicos</p>
+                <p id="summary-participants" class="text-3xl font-bold text-green-500 mt-1">—</p>
             </div>
-            <div>
-                <label for="category" class="block text-sm font-medium text-white mb-1">Distancia</label>
-                <select
-                    id="category"
-                    class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Cargando distancias...</option>
-                </select>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Mujeres</p>
+                <p id="summary-female" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Hombres</p>
+                <p id="summary-male" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Participantes en 1K</p>
+                <p id="summary-1k" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Participantes en 5K</p>
+                <p id="summary-5k" class="text-3xl font-bold text-green-500 mt-1">—</p>
             </div>
         </div>
-        <div class="mt-4 text-right">
-            <button
-                id="applyFilters"
-                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
-                Aplicar Filtros
-            </button>
-        </div>
-    </div>
 
-    <section id="oneKSection" class="space-y-6">
-        <div class="flex items-center justify-between flex-wrap gap-2">
-            <h3 class="text-2xl font-semibold text-green-400">Análisis de la distancia 1K</h3>
-            <p class="text-sm text-gray-400">Resumen dinámico por género, edad y tiempos.</p>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
-                <h4 class="text-lg font-semibold text-green-400">Participantes 1K</h4>
-                <p id="oneKParticipantsCount" class="text-4xl font-bold mt-3">—</p>
-                <p class="text-sm text-gray-400 mt-2">Total de atletas distintos que han nadado 1K.</p>
-            </div>
-            <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
-                <h4 class="text-lg font-semibold text-green-400">Género (1K)</h4>
-                <div class="chart-wrapper chart-wrapper-small mt-3">
-                    <canvas id="oneKGenderChart" class="chart-canvas chart-canvas-small"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
+                    <span class="text-xs text-gray-400">General</span>
+                </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
                 </div>
             </div>
-            <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
-                <h4 class="text-lg font-semibold text-green-400">Edad (1K)</h4>
-                <div class="chart-wrapper chart-wrapper-small mt-3">
-                    <canvas id="oneKAgeChart" class="chart-canvas chart-canvas-small"></canvas>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Participantes por año</h3>
+                    <span class="text-xs text-gray-400">Serie histórica</span>
                 </div>
-            </div>
-        </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h4 class="text-lg font-semibold text-green-400">Distribución de tiempos (1K)</h4>
-                    <p class="text-sm text-gray-400">Filtra por género y grupo de edad para actualizar el histograma.</p>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
-                    <div>
-                        <label for="oneKGenderFilter" class="block text-xs text-gray-400 uppercase tracking-wide">Género</label>
-                        <select id="oneKGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="">Todos los géneros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="oneKAgeFilter" class="block text-xs text-gray-400 uppercase tracking-wide">Grupo de edad</label>
-                        <select id="oneKAgeFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="">Todas las edades</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <p id="oneKTimeStatus" class="text-sm text-gray-400 mt-3 hidden"></p>
-            <div class="chart-wrapper mt-4">
-                <canvas id="oneKTimeChart" class="chart-canvas"></canvas>
             </div>
         </div>
     </section>
 
-    <div id="chronologyDashboard" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Eventos registrados</h3>
-            <p id="chronology-events-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
+    <section aria-label="Filtros de cronología" class="bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <h3 class="text-lg font-semibold text-green-400">Filtrar resultados</h3>
+            <p class="text-sm text-gray-400">Selecciona evento, sexo, rama y distancia. Cada lista incluye la opción "Todos".</p>
         </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md lg:col-span-3 lg:row-span-2">
-            <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
-            <div class="chart-wrapper mt-4">
-                <canvas id="activityChart" class="chart-canvas"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label for="chronologyEventFilter" class="block text-sm font-medium text-white mb-1">Evento</label>
+                <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label for="chronologyGenderFilter" class="block text-sm font-medium text-white mb-1">Sexo</label>
+                <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Rama</label>
+                <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label for="chronologyDistanceFilter" class="block text-sm font-medium text-white mb-1">Distancia</label>
+                <select id="chronologyDistanceFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+        </div>
+        <div class="text-right">
+            <button id="applyChronologyFilters" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
+                Aplicar filtros
+            </button>
+        </div>
+    </section>
+
+    <section aria-label="Resultados filtrados" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Participantes filtrados</p>
+                <p id="filtered-participants" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Mujeres</p>
+                <p id="filtered-female" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Hombres</p>
+                <p id="filtered-male" class="text-3xl font-bold text-green-500 mt-1">—</p>
             </div>
         </div>
         <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Participaciones registradas</h3>
-            <p id="chronology-participants-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
-        </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Distancias catalogadas</h3>
-            <p id="chronology-distances-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
-        </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Géneros catalogados</h3>
-            <p id="chronology-genders-count" class="text-3xl font-bold mt-2 text-green-500">—</p>
-        </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-green-400">Participantes por distancia</h3>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos</h3>
+                    <p class="text-sm text-gray-400">Histograma de los tiempos registrados para los filtros actuales.</p>
+                </div>
+                <p id="chronologyTimeStatus" class="text-sm text-gray-400 hidden">—</p>
+            </div>
             <div class="chart-wrapper mt-4">
-                <canvas id="distanceChart" class="chart-canvas"></canvas>
+                <canvas id="chronologyTimeChart" class="chart-canvas"></canvas>
             </div>
         </div>
-    </div>
+    </section>
 </div>
