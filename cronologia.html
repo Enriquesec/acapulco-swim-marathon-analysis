@@ -1,4 +1,13 @@
-    <div id="chronologyHighlights" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="container mx-auto space-y-6">
+    <header class="flex items-start justify-between flex-wrap gap-3">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Cronología</p>
+            <h2 class="text-3xl font-bold text-white">Explora la evolución del maratón</h2>
+            <p class="text-sm text-gray-400 max-w-3xl">Consulta los picos de participación, filtra los datos por evento y descubre cómo se comportan los atletas por distancia, género y edad.</p>
+        </div>
+    </header>
+
+    <div id="chronologyHighlights" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card card-compact bg-gray-800 text-white rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-green-400">Participantes únicos por distancia</h3>
             <p class="text-sm text-gray-400 mt-1">Atletas distintos registrados en cada trayecto.</p>
@@ -15,7 +24,25 @@
         </div>
     </div>
 
-    <div id="yearTrendCard" class="card bg-gray-800 text-white p-6 rounded-lg shadow-md mb-6">
+    <div id="chronologyInsights" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-green-400">Ediciones con más participación</h3>
+            <p class="text-sm text-gray-400 mt-1">Top de eventos por atletas únicos inscritos.</p>
+            <ul id="topEventsList" class="mt-4 space-y-3 text-sm text-gray-200"></ul>
+        </div>
+        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-green-400">Categorías más concurridas</h3>
+            <p class="text-sm text-gray-400 mt-1">Grupos con mayor número de participaciones.</p>
+            <ul id="topCategoriesList" class="mt-4 space-y-3 text-sm text-gray-200"></ul>
+        </div>
+        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-green-400">Mejores marcas registradas</h3>
+            <p class="text-sm text-gray-400 mt-1">Tiempos destacados en cualquier distancia.</p>
+            <ul id="fastestMarksList" class="mt-4 space-y-3 text-sm text-gray-200"></ul>
+        </div>
+    </div>
+
+    <div id="yearTrendCard" class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
         <h3 class="text-lg font-semibold text-green-400">Participantes únicos por año</h3>
         <p class="text-sm text-gray-400 mt-1">Comparativo histórico del total de nadadores registrados en cada edición.</p>
         <div class="chart-wrapper mt-4">
@@ -23,44 +50,44 @@
         </div>
     </div>
 
-    <div id="chronologyFilters" class="bg-gray-800 p-6 rounded-lg shadow-md mb-6 mt-0">
+    <div id="chronologyFilters" class="bg-gray-800 p-6 rounded-lg shadow-md">
         <h3 class="text-lg font-semibold text-green-400 mb-4">Filtros</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
                 <label for="edition" class="block text-sm font-medium text-white mb-1">Evento</label>
-                <select 
-                    id="edition" 
+                <select
+                    id="edition"
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
                     <option value="">Cargando eventos...</option>
                 </select>
             </div>
             <div>
                 <label for="gender" class="block text-sm font-medium text-white mb-1">Sexo</label>
-                <select 
-                    id="gender" 
+                <select
+                    id="gender"
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
                     <option value="">Cargando catálogos...</option>
                 </select>
             </div>
             <div>
                 <label for="category" class="block text-sm font-medium text-white mb-1">Distancia</label>
-                <select 
-                    id="category" 
+                <select
+                    id="category"
                     class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
                     <option value="">Cargando distancias...</option>
                 </select>
             </div>
         </div>
         <div class="mt-4 text-right">
-            <button 
-                id="applyFilters" 
+            <button
+                id="applyFilters"
                 class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
                 Aplicar Filtros
             </button>
         </div>
     </div>
 
-    <section id="oneKSection" class="space-y-6 mb-6">
+    <section id="oneKSection" class="space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-2">
             <h3 class="text-2xl font-semibold text-green-400">Análisis de la distancia 1K</h3>
             <p class="text-sm text-gray-400">Resumen dinámico por género, edad y tiempos.</p>
@@ -142,3 +169,4 @@
             </div>
         </div>
     </div>
+</div>

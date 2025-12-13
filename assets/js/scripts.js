@@ -401,15 +401,14 @@ const deriveAgeGroup = (record) => {
     return record.ageGroup || 'Sin registro';
 };
 
-const buildParticipantKey = (record) => {
-    return (
-        record.participant_id ||
-        record.participantId ||
-        record['número_de_competidor'] ||
-        record.numero_de_competidor ||
-        record.bib ||
-        normalizeText(record.nombre_completo || record.name || '')
-    );
+const buildParticipantKey = (participantId, fallbackName = '', fallbackBib = '') => {
+    const normalizedId = participantId?.toString().trim();
+    if (normalizedId) return normalizedId;
+
+    const normalizedBib = fallbackBib?.toString().trim();
+    if (normalizedBib) return normalizedBib;
+
+    return normalizeText(fallbackName || '');
 };
 
 const parseResultTimeInMinutes = (record) => {
@@ -436,20 +435,38 @@ const parseResultTimeInMinutes = (record) => {
     return null;
 };
 
+const formatMinutesToLabel = (minutes = 0) => {
+    const totalSeconds = Math.round(minutes * 60);
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return [hours, mins, secs].map(value => String(value).padStart(2, '0')).join(':');
+};
+
 const normalizeRecordForStats = (record) => {
     const distanceLabel = normalizeDistanceLabel(record.distance || record.distancia || record['distancia (km)']);
     if (!distanceLabel) return null;
 
     const genderRaw = record.sexo || record.gender || 'No especificado';
     const gender = genderRaw.toString().trim().toUpperCase();
+    const timeMinutes = parseResultTimeInMinutes(record);
+
+    const participantId = record.participant_id ||
+        record.participantId ||
+        record['número_de_competidor'] ||
+        record.numero_de_competidor ||
+        record.bib;
 
     return {
-        participantKey: buildParticipantKey(record.participant_id || record.participantId, record.nombre_completo || record.name),
+        participantKey: buildParticipantKey(participantId, record.nombre_completo || record.name, record.bib),
         name: record.nombre_completo || record.name || 'Sin nombre',
         gender,
         ageGroup: deriveAgeGroup(record),
         distance: distanceLabel,
-        timeMinutes: parseResultTimeInMinutes(record),
+        timeMinutes,
+        timeLabel: record.tiempo_label || record.time || (Number.isFinite(timeMinutes) ? formatMinutesToLabel(timeMinutes) : '—'),
+        category: record.categoria || record.category || 'Categoría N/D',
+        event: record.evento || record.event || 'Evento N/D',
         year: extractYearFromEvent(record.evento || record.event || '')
     };
 };
@@ -515,6 +532,56 @@ const aggregateAgeDistribution = (records) => {
         acc[key] = (acc[key] || 0) + 1;
         return acc;
     }, {});
+};
+
+const aggregateTopEventsByParticipants = (records, limit = 3) => {
+    const eventMap = new Map();
+
+    records.forEach(record => {
+        if (!record) return;
+        const eventKey = record.event || 'Evento N/D';
+        if (!eventMap.has(eventKey)) {
+            eventMap.set(eventKey, new Set());
+        }
+        eventMap.get(eventKey).add(record.participantKey);
+    });
+
+    return Array.from(eventMap.entries())
+        .map(([event, participants]) => ({
+            event,
+            year: extractYearFromEvent(event),
+            count: participants.size
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+};
+
+const aggregateTopCategories = (records, limit = 3) => {
+    const categoryMap = new Map();
+
+    records.forEach(record => {
+        if (!record) return;
+        const category = record.category || 'Categoría N/D';
+        categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
+    });
+
+    return Array.from(categoryMap.entries())
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+};
+
+const findFastestPerformances = (records, limit = 3) => {
+    return records
+        .filter(record => record && Number.isFinite(record.timeMinutes))
+        .sort((a, b) => a.timeMinutes - b.timeMinutes)
+        .slice(0, limit)
+        .map(item => ({
+            name: item.name,
+            distance: item.distance,
+            timeLabel: item.timeLabel,
+            gender: item.gender
+        }));
 };
 
 const buildTimeHistogram = (values, binSize = 5) => {
@@ -896,6 +963,38 @@ const createEmptyState = (message) => {
     return wrapper;
 };
 
+const renderInsightList = (containerId, items, formatter, emptyMessage) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!items.length) {
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'text-gray-400';
+        emptyItem.textContent = emptyMessage;
+        container.appendChild(emptyItem);
+        return;
+    }
+
+    items.forEach((item, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'flex items-start gap-3';
+
+        const badge = document.createElement('span');
+        badge.className = 'flex h-7 w-7 items-center justify-center rounded-full bg-green-900/40 text-green-300 text-xs font-semibold';
+        badge.textContent = index + 1;
+
+        const content = document.createElement('div');
+        content.className = 'flex-1 space-y-1';
+        content.innerHTML = formatter(item);
+
+        listItem.appendChild(badge);
+        listItem.appendChild(content);
+        container.appendChild(listItem);
+    });
+};
+
 async function initializeChronology() {
     const dashboard = document.getElementById('chronologyDashboard');
     if (!dashboard) return;
@@ -929,6 +1028,39 @@ async function initializeChronology() {
 
         const totalUniqueParticipants = new Set(normalizedRecords.map(record => record.participantKey)).size;
         setTextContent('chronology-participants-count', totalUniqueParticipants || '0');
+
+        const topEvents = aggregateTopEventsByParticipants(normalizedRecords, 3);
+        renderInsightList(
+            'topEventsList',
+            topEvents,
+            item => `
+                <p class="font-semibold">${item.event}</p>
+                <p class="text-xs text-gray-400">${item.year} · ${item.count} atletas únicos</p>
+            `,
+            'Aún no hay eventos con registros suficientes.'
+        );
+
+        const topCategories = aggregateTopCategories(normalizedRecords, 3);
+        renderInsightList(
+            'topCategoriesList',
+            topCategories,
+            item => `
+                <p class="font-semibold">${item.category}</p>
+                <p class="text-xs text-gray-400">${item.count} participaciones históricas</p>
+            `,
+            'No se encontraron categorías con actividad.'
+        );
+
+        const fastestMarks = findFastestPerformances(normalizedRecords, 3);
+        renderInsightList(
+            'fastestMarksList',
+            fastestMarks,
+            item => `
+                <p class="font-semibold">${item.timeLabel}</p>
+                <p class="text-xs text-gray-400">${item.name} · ${item.distance} · ${item.gender}</p>
+            `,
+            'Sin tiempos registrados para mostrar.'
+        );
 
         const yearlyData = aggregateParticipantsByYear(normalizedRecords);
         renderYearTrendChart(yearlyData);
