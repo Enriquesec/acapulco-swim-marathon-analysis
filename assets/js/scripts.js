@@ -12,6 +12,29 @@ const extractYearFromEvent = (eventString = '') => {
     return match ? match[0] : 'Año N/D';
 };
 
+const parseEventInfo = (eventString = '') => {
+    const eventPattern = /id=(\d+)_([\d]+)_maraton_acapulco_(\d{4})/i;
+    const match = eventString.match(eventPattern);
+
+    if (match) {
+        const [, eventId, edition, year] = match;
+        return {
+            eventId,
+            edition,
+            year,
+            label: `${edition} Maratón ${year}`
+        };
+    }
+
+    const year = extractYearFromEvent(eventString);
+    return {
+        eventId: eventString || null,
+        edition: null,
+        year,
+        label: eventString || 'Evento no especificado'
+    };
+};
+
 const buildCompetitorKey = (id, name) => {
     if (id) return normalizeText(id);
     return normalizeText(name || '');
@@ -128,23 +151,28 @@ async function setupResultsPage() {
         return `${safeHours}:${safeMinutes}:${safeSeconds}`;
     };
 
-    const normalizeResult = (result) => ({
-        year: result.year || extractYearFromEvent(result.evento || result.event),
-        distance: result.distance || result.distancia || 'Distancia N/D',
-        category: result.category || result.categoria || 'Categoría N/D',
-        time: result.tiempo_label || result.time || formatTime(result.time_hours, result.time_minutes, result.time_seconds),
-        positionCategory: result.position_category || result['lugar_categoría'] || result.lugar_categoria || '—',
-        positionGender: result.lugar_rama || result.position_gender || '—',
-        positionGeneral: result.position_general || result.lugar_general || '—',
-        name: result.name || result.nombre_completo || 'Nombre no disponible',
-        bib: result.bib || result['número_de_competidor'] || result.numero_de_competidor || result.participant_id || 'N/D',
-        team: result.equipo || 'Sin equipo',
-        origin: result.procedencia || result.estado_estandarizado || 'Procedencia no registrada',
-        event: result.evento || 'Evento no especificado',
-        gender: result.gender || result.sexo || '—',
-        ageGroup: Array.isArray(result.edad_categorias) ? result.edad_categorias.join(', ') : (result.edad || '—'),
-        participantId: result.participant_id || result.participantId || null
-    });
+    const normalizeResult = (result) => {
+        const eventInfo = parseEventInfo(result.evento || result.event);
+
+        return {
+            year: result.year || eventInfo.year,
+            distance: result.distance || result.distancia || 'Distancia N/D',
+            category: result.category || result.categoria || 'Categoría N/D',
+            time: result.tiempo_label || result.time || formatTime(result.time_hours, result.time_minutes, result.time_seconds),
+            positionCategory: result.position_category || result['lugar_categoría'] || result.lugar_categoria || '—',
+            positionGender: result.lugar_rama || result.position_gender || '—',
+            positionGeneral: result.position_general || result.lugar_general || '—',
+            name: result.name || result.nombre_completo || 'Nombre no disponible',
+            team: result.equipo || 'Sin equipo',
+            origin: result.procedencia || result.estado_estandarizado || 'Procedencia no registrada',
+            event: eventInfo.label,
+            eventId: eventInfo.eventId,
+            eventEdition: eventInfo.edition,
+            gender: result.gender || result.sexo || '—',
+            ageGroup: Array.isArray(result.edad_categorias) ? result.edad_categorias.join(', ') : (result.edad || '—'),
+            participantId: result.participant_id || result.participantId || null
+        };
+    };
 
     const getCategoryRange = (records = []) => {
         if (!records.length) return null;
@@ -167,6 +195,26 @@ async function setupResultsPage() {
             last: categories[categories.length - 1],
             hasRange: uniqueCategories.length > 1
         };
+    };
+
+    const groupRecordsByEvent = (records = []) => {
+        const eventGroups = new Map();
+
+        records.forEach(record => {
+            const key = record.eventId || record.event || record.year || record.distance;
+            if (!eventGroups.has(key)) {
+                eventGroups.set(key, {
+                    eventId: record.eventId || key,
+                    label: record.event || 'Evento no especificado',
+                    year: parseInt(record.year, 10) || 0,
+                    items: []
+                });
+            }
+            eventGroups.get(key).items.push(record);
+        });
+
+        const sortByYearDesc = (a, b) => b.year - a.year;
+        return Array.from(eventGroups.values()).sort(sortByYearDesc);
     };
 
     const groupResultsByCompetitor = (data) => {
@@ -281,71 +329,96 @@ async function setupResultsPage() {
                 return;
             }
 
-            resultsContainer.innerHTML = dataToRender.map(result => `
-                <div class="card text-left space-y-4" data-competitor-key="${result.key}">
-                    <div class="space-y-1">
-                        <p class="text-xs uppercase tracking-wide text-green-400">Competidor</p>
-                        <h3 class="text-2xl font-bold">${result.name}</h3>
-                        <p class="text-sm text-gray-300">${result.origin}</p>
-                        <p class="text-sm text-gray-400">${result.team}</p>
-                        <p class="text-xs text-gray-500"># Competidor: ${result.bib} · Participaciones: ${result.records.length}</p>
-                        <p class="text-xs text-gray-500">Sexo: ${result.gender || 'N/D'} · ${(() => {
-                            const categoryRange = getCategoryRange(result.records);
-                            if (categoryRange?.hasRange) {
-                                return `Categorías: ${categoryRange.first} → ${categoryRange.last}`;
-                            }
-                            if (categoryRange?.first) {
-                                return `Categoría: ${categoryRange.first}`;
-                            }
-                            return `Categoría: ${result.ageGroup || 'N/D'}`;
-                        })()}</p>
+            resultsContainer.innerHTML = dataToRender.map(result => {
+                const groupedRecords = groupRecordsByEvent(result.records);
+
+                return `
+                    <div class="card text-left space-y-4" data-competitor-key="${result.key}">
+                        <div class="space-y-1">
+                            <p class="text-xs uppercase tracking-wide text-green-400">Competidor</p>
+                            <h3 class="text-2xl font-bold">${result.name}</h3>
+                            <p class="text-sm text-gray-300">${result.origin}</p>
+                            <p class="text-sm text-gray-400">${result.team}</p>
+                            <p class="text-xs text-gray-500">Participaciones: ${result.records.length}</p>
+                            <p class="text-xs text-gray-500">Sexo: ${result.gender || 'N/D'} · ${(() => {
+                                const categoryRange = getCategoryRange(result.records);
+                                if (categoryRange?.hasRange) {
+                                    return `Categorías: ${categoryRange.first} → ${categoryRange.last}`;
+                                }
+                                if (categoryRange?.first) {
+                                    return `Categoría: ${categoryRange.first}`;
+                                }
+                                return `Categoría: ${result.ageGroup || 'N/D'}`;
+                            })()}</p>
+                        </div>
+                        ${result.records.length === 0 ? `
+                            <div class="bg-gray-900 rounded-lg p-4 text-sm text-gray-400">
+                                Aún no registramos resultados históricos para este participante.
+                            </div>
+                        ` : `
+                            <button class="w-full px-4 py-2 bg-green-500 text-gray-900 font-semibold rounded-lg hover:bg-green-400 transition view-participant">Ver detalle al estilo Strava</button>
+                            <div class="space-y-3">
+                                ${groupedRecords.map(group => `
+                                    <div class="bg-gray-900 rounded-lg p-3 space-y-2">
+                                        <div class="flex flex-wrap justify-between items-center gap-2">
+                                            <p class="text-lg font-semibold text-green-400">${group.label}</p>
+                                            <span class="text-sm font-bold">${group.items.length} participación${group.items.length !== 1 ? 'es' : ''}</span>
+                                        </div>
+                                        <div class="space-y-3">
+                                            ${group.items.map(record => `
+                                                <div class="bg-gray-800 rounded-lg p-3 space-y-2">
+                                                    <div class="flex flex-wrap justify-between items-center gap-2">
+                                                        <p class="text-base font-semibold">${record.year} · ${record.distance}</p>
+                                                        <span class="text-sm font-bold">${record.time}</span>
+                                                    </div>
+                                                    <p class="text-sm"><strong>Categoría:</strong> ${record.category}</p>
+                                                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                                        <div class="bg-gray-900 rounded-md py-2">
+                                                            <p class="text-gray-400">Cat.</p>
+                                                            <p class="text-base font-bold">${record.positionCategory}</p>
+                                                        </div>
+                                                        <div class="bg-gray-900 rounded-md py-2">
+                                                            <p class="text-gray-400">Rama</p>
+                                                            <p class="text-base font-bold">${record.positionGender}</p>
+                                                        </div>
+                                                        <div class="bg-gray-900 rounded-md py-2">
+                                                            <p class="text-gray-400">Gral.</p>
+                                                            <p class="text-base font-bold">${record.positionGeneral}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
                     </div>
-                    ${result.records.length === 0 ? `
-                        <div class="bg-gray-900 rounded-lg p-4 text-sm text-gray-400">
-                            Aún no registramos resultados históricos para este participante.
-                        </div>
-                    ` : `
-                        <button class="w-full px-4 py-2 bg-green-500 text-gray-900 font-semibold rounded-lg hover:bg-green-400 transition view-participant">Ver detalle al estilo Strava</button>
-                        <div class="space-y-3">
-                            ${result.records.map(record => `
-                                <div class="bg-gray-900 rounded-lg p-3 space-y-2">
-                                    <div class="flex flex-wrap justify-between items-center gap-2">
-                                        <p class="text-lg font-semibold text-green-400">${record.year} · ${record.distance}</p>
-                                        <span class="text-sm font-bold">${record.time}</span>
-                                    </div>
-                                    <p class="text-sm"><strong>Categoría:</strong> ${record.category}</p>
-                                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                                        <div class="bg-gray-800 rounded-md py-2">
-                                            <p class="text-gray-400">Cat.</p>
-                                            <p class="text-base font-bold">${record.positionCategory}</p>
-                                        </div>
-                                        <div class="bg-gray-800 rounded-md py-2">
-                                            <p class="text-gray-400">Rama</p>
-                                            <p class="text-base font-bold">${record.positionGender}</p>
-                                        </div>
-                                        <div class="bg-gray-800 rounded-md py-2">
-                                            <p class="text-gray-400">Gral.</p>
-                                            <p class="text-base font-bold">${record.positionGeneral}</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-500">${record.event}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `}
-                </div>
-            `).join('');
+                `;
+            }).join('');
         };
 
         const totalCompetitors = combinedData.length;
+        const minCharacters = 6;
         const instructionsMessage = `<p class="col-span-full text-gray-400">Ingresa un nombre o apellido para buscar entre ${totalCompetitors.toLocaleString('es-MX')} participantes (ej. \"Lopez\").</p>`;
+        const minLengthMessage = `<p class="col-span-full text-gray-400">Escribe al menos ${minCharacters} caracteres antes de realizar la búsqueda.</p>`;
+        const searchButton = document.getElementById('searchButton');
         resultsContainer.innerHTML = instructionsMessage;
 
-        searchInput.addEventListener('input', (e) => {
-            const normalizedTerm = normalizeText(e.target.value);
+        const setSearchButtonState = (term) => {
+            if (!searchButton) return;
+            const isDisabled = term.length < minCharacters;
+            searchButton.disabled = isDisabled;
+            searchButton.classList.toggle('opacity-60', isDisabled);
+            searchButton.classList.toggle('cursor-not-allowed', isDisabled);
+        };
 
-            if (!normalizedTerm) {
-                resultsContainer.innerHTML = instructionsMessage;
+        const handleSearch = () => {
+            const normalizedTerm = normalizeText(searchInput.value);
+
+            if (normalizedTerm.length < minCharacters) {
+                resultsContainer.innerHTML = minLengthMessage;
+                setSearchButtonState(normalizedTerm);
                 return;
             }
 
@@ -354,7 +427,35 @@ async function setupResultsPage() {
             );
 
             renderResults(filteredResults);
+            setSearchButtonState(normalizedTerm);
+        };
+
+        searchInput.addEventListener('input', (e) => {
+            const normalizedTerm = normalizeText(e.target.value);
+
+            if (!normalizedTerm) {
+                resultsContainer.innerHTML = instructionsMessage;
+                setSearchButtonState(normalizedTerm);
+                return;
+            }
+
+            if (normalizedTerm.length < minCharacters) {
+                resultsContainer.innerHTML = minLengthMessage;
+            }
+
+            setSearchButtonState(normalizedTerm);
         });
+
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        if (searchButton) {
+            setSearchButtonState(normalizeText(searchInput.value));
+            searchButton.addEventListener('click', handleSearch);
+        }
 
         const renderParticipantDetail = (participant) => {
             if (!participantDetail || !detailContent) return;
