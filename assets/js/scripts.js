@@ -109,6 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
 async function setupResultsPage() {
     const searchInput = document.getElementById('searchInput');
     const resultsContainer = document.getElementById('resultsContainer');
+    const participantDetail = document.getElementById('participantDetail');
+    const detailContent = document.getElementById('detailContent');
+    const detailName = document.getElementById('detailName');
+    const detailMeta = document.getElementById('detailMeta');
+    const detailCategoryFilter = document.getElementById('detailCategoryFilter');
+    const detailDistanceFilter = document.getElementById('detailDistanceFilter');
+    const closeDetailButton = document.getElementById('closeParticipantDetail');
+
+    let selectedParticipant = null;
 
     if (!searchInput || !resultsContainer) return;
 
@@ -137,6 +146,29 @@ async function setupResultsPage() {
         participantId: result.participant_id || result.participantId || null
     });
 
+    const getCategoryRange = (records = []) => {
+        if (!records.length) return null;
+
+        const sortedByYear = [...records].sort((a, b) => {
+            const yearA = parseInt(a.year, 10) || 0;
+            const yearB = parseInt(b.year, 10) || 0;
+            return yearA - yearB;
+        });
+
+        const categories = sortedByYear
+            .map(record => record.category)
+            .filter(Boolean);
+
+        if (!categories.length) return null;
+
+        const uniqueCategories = Array.from(new Set(categories));
+        return {
+            first: categories[0],
+            last: categories[categories.length - 1],
+            hasRange: uniqueCategories.length > 1
+        };
+    };
+
     const groupResultsByCompetitor = (data) => {
         const groups = new Map();
 
@@ -144,6 +176,7 @@ async function setupResultsPage() {
             const key = buildCompetitorKey(result.participantId, result.name);
             if (!groups.has(key)) {
                 groups.set(key, {
+                    key,
                     name: result.name,
                     origin: result.origin,
                     team: result.team,
@@ -174,7 +207,10 @@ async function setupResultsPage() {
 
     const mergeParticipantsCatalog = (competitors, participantsCatalog = []) => {
         const competitorMap = new Map(
-            competitors.map(entry => [buildCompetitorKey(entry.participantId, entry.name), entry])
+            competitors.map(entry => {
+                const entryKey = entry.key || buildCompetitorKey(entry.participantId, entry.name);
+                return [entryKey, { ...entry, key: entryKey }];
+            })
         );
 
         participantsCatalog.forEach(participant => {
@@ -183,6 +219,7 @@ async function setupResultsPage() {
             if (!key) return;
 
             const participantInfo = {
+                key,
                 name: participantName || 'Participante no identificado',
                 origin: Array.isArray(participant.procedencias) && participant.procedencias.length > 0
                     ? participant.procedencias[0]
@@ -245,20 +282,30 @@ async function setupResultsPage() {
             }
 
             resultsContainer.innerHTML = dataToRender.map(result => `
-                <div class="card text-left space-y-4">
+                <div class="card text-left space-y-4" data-competitor-key="${result.key}">
                     <div class="space-y-1">
                         <p class="text-xs uppercase tracking-wide text-green-400">Competidor</p>
                         <h3 class="text-2xl font-bold">${result.name}</h3>
                         <p class="text-sm text-gray-300">${result.origin}</p>
                         <p class="text-sm text-gray-400">${result.team}</p>
                         <p class="text-xs text-gray-500"># Competidor: ${result.bib} · Participaciones: ${result.records.length}</p>
-                        <p class="text-xs text-gray-500">Sexo: ${result.gender || 'N/D'} · Categoría: ${result.ageGroup || 'N/D'}</p>
+                        <p class="text-xs text-gray-500">Sexo: ${result.gender || 'N/D'} · ${(() => {
+                            const categoryRange = getCategoryRange(result.records);
+                            if (categoryRange?.hasRange) {
+                                return `Categorías: ${categoryRange.first} → ${categoryRange.last}`;
+                            }
+                            if (categoryRange?.first) {
+                                return `Categoría: ${categoryRange.first}`;
+                            }
+                            return `Categoría: ${result.ageGroup || 'N/D'}`;
+                        })()}</p>
                     </div>
                     ${result.records.length === 0 ? `
                         <div class="bg-gray-900 rounded-lg p-4 text-sm text-gray-400">
                             Aún no registramos resultados históricos para este participante.
                         </div>
                     ` : `
+                        <button class="w-full px-4 py-2 bg-green-500 text-gray-900 font-semibold rounded-lg hover:bg-green-400 transition view-participant">Ver detalle al estilo Strava</button>
                         <div class="space-y-3">
                             ${result.records.map(record => `
                                 <div class="bg-gray-900 rounded-lg p-3 space-y-2">
@@ -302,11 +349,136 @@ async function setupResultsPage() {
                 return;
             }
 
-            const filteredResults = combinedData.filter(result => 
+            const filteredResults = combinedData.filter(result =>
                 result.searchIndex && result.searchIndex.includes(normalizedTerm)
             );
 
             renderResults(filteredResults);
+        });
+
+        const renderParticipantDetail = (participant) => {
+            if (!participantDetail || !detailContent) return;
+
+            selectedParticipant = participant;
+            participantDetail.classList.remove('hidden');
+            detailName.textContent = participant.name;
+
+            const categoryRange = getCategoryRange(participant.records);
+            const categorySummary = categoryRange?.hasRange
+                ? `${categoryRange.first} → ${categoryRange.last}`
+                : (categoryRange?.first || participant.ageGroup || 'N/D');
+
+            detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Categoría/Edad: ${categorySummary}`;
+
+            const availableCategories = Array.from(new Set(participant.records
+                .map(record => record.category)
+                .filter(Boolean)));
+
+            if (detailCategoryFilter) {
+                detailCategoryFilter.innerHTML = '<option value="">Todas las categorías</option>' +
+                    availableCategories.map(category => `<option value="${category}">${category}</option>`).join('');
+                detailCategoryFilter.value = '';
+            }
+            if (detailDistanceFilter) {
+                detailDistanceFilter.value = '';
+            }
+
+            const renderDetailRecords = () => {
+                if (!selectedParticipant) return;
+                const categoryFilter = detailCategoryFilter?.value || '';
+                const distanceFilter = detailDistanceFilter?.value || '';
+
+                const filtered = selectedParticipant.records.filter(record => {
+                    const matchesCategory = categoryFilter ? record.category === categoryFilter || (record.ageGroup && record.ageGroup.includes(categoryFilter)) : true;
+                    const normalizedDistance = normalizeDistanceLabel(record.distance);
+                    const matchesDistance = distanceFilter ? normalizedDistance === distanceFilter : true;
+                    return matchesCategory && matchesDistance;
+                });
+
+                const sections = [
+                    { label: '1K', distance: '1K' },
+                    { label: '5K', distance: '5K' },
+                    { label: 'Otras distancias', distance: 'OTHER' }
+                ];
+
+                const buildSection = (section) => {
+                    const sectionRecords = filtered.filter(record => {
+                        const normalizedDistance = normalizeDistanceLabel(record.distance);
+                        if (section.distance === 'OTHER') {
+                            return normalizedDistance !== '1K' && normalizedDistance !== '5K';
+                        }
+                        return normalizedDistance === section.distance;
+                    });
+
+                    if (!sectionRecords.length) return '';
+
+                    return `
+                        <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-sm uppercase tracking-wide text-green-400">${section.label}</p>
+                                <p class="text-xs text-gray-400">${sectionRecords.length} participaciones</p>
+                            </div>
+                            <div class="space-y-3">
+                                ${sectionRecords.map(record => `
+                                    <div class="bg-gray-800/60 rounded-lg p-3">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div>
+                                                <p class="text-base font-semibold">${record.year} · ${record.event}</p>
+                                                <p class="text-xs text-gray-400">Categoría: ${record.category}</p>
+                                            </div>
+                                            <p class="text-lg font-bold text-green-400">${record.time}</p>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 text-center text-xs mt-2">
+                                            <div class="bg-gray-900 rounded-md py-2">
+                                                <p class="text-gray-400">Cat.</p>
+                                                <p class="text-base font-bold">${record.positionCategory}</p>
+                                            </div>
+                                            <div class="bg-gray-900 rounded-md py-2">
+                                                <p class="text-gray-400">Rama</p>
+                                                <p class="text-base font-bold">${record.positionGender}</p>
+                                            </div>
+                                            <div class="bg-gray-900 rounded-md py-2">
+                                                <p class="text-gray-400">Gral.</p>
+                                                <p class="text-base font-bold">${record.positionGeneral}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                const renderedSections = sections.map(buildSection).filter(Boolean).join('');
+                detailContent.innerHTML = renderedSections || '<p class="text-gray-400">No hay participaciones que coincidan con los filtros seleccionados.</p>';
+            };
+
+            if (detailCategoryFilter) {
+                detailCategoryFilter.onchange = renderDetailRecords;
+            }
+            if (detailDistanceFilter) {
+                detailDistanceFilter.onchange = renderDetailRecords;
+            }
+            if (closeDetailButton) {
+                closeDetailButton.onclick = () => {
+                    participantDetail.classList.add('hidden');
+                    selectedParticipant = null;
+                };
+            }
+
+            renderDetailRecords();
+        };
+
+        resultsContainer.addEventListener('click', (event) => {
+            const actionButton = event.target.closest('.view-participant');
+            const card = event.target.closest('[data-competitor-key]');
+            if (actionButton && card) {
+                const key = card.getAttribute('data-competitor-key');
+                const participant = combinedData.find(item => item.key === key);
+                if (participant) {
+                    renderParticipantDetail(participant);
+                }
+            }
         });
     } catch (error) {
         resultsContainer.innerHTML = '<p class="col-span-full text-red-500">Error al cargar los datos de resultados.</p>';
