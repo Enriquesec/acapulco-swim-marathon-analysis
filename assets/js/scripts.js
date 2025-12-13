@@ -144,7 +144,14 @@ async function setupResultsPage() {
     const detailCategoryFilter = document.getElementById('detailCategoryFilter');
     const detailDistanceFilter = document.getElementById('detailDistanceFilter');
     const closeDetailButton = document.getElementById('closeParticipantDetail');
+    const resultsNavigation = document.getElementById('resultsNavigation');
+    const prevResultsButton = document.getElementById('prevResults');
+    const nextResultsButton = document.getElementById('nextResults');
+    const resultsPageIndicator = document.getElementById('resultsPageIndicator');
 
+    const RESULTS_PER_PAGE = 10;
+    let currentPage = 1;
+    let currentResults = [];
     let selectedParticipant = null;
 
     if (!searchInput || !resultsContainer) return;
@@ -328,13 +335,39 @@ async function setupResultsPage() {
         const aggregatedData = groupResultsByCompetitor(normalizedData);
         const combinedData = mergeParticipantsCatalog(aggregatedData, participantsCatalog);
 
-        const renderResults = (dataToRender) => {
-            if (dataToRender.length === 0) {
-                resultsContainer.innerHTML = '<p class="col-span-full text-gray-400">No se encontraron resultados para tu búsqueda.</p>';
-                return;
+        const hideResultsNavigation = () => {
+            if (resultsNavigation) {
+                resultsNavigation.classList.add('hidden');
             }
+        };
 
-            resultsContainer.innerHTML = dataToRender.map(result => {
+        const updateNavigation = (totalItems, totalPages) => {
+            if (!resultsNavigation || !resultsPageIndicator) return;
+
+            const shouldShow = totalItems > RESULTS_PER_PAGE;
+            resultsNavigation.classList.toggle('hidden', !shouldShow);
+
+            if (shouldShow) {
+                resultsPageIndicator.textContent = `Página ${currentPage} de ${totalPages}`;
+                if (prevResultsButton) {
+                    prevResultsButton.disabled = currentPage === 1;
+                }
+                if (nextResultsButton) {
+                    nextResultsButton.disabled = currentPage === totalPages;
+                }
+            }
+        };
+
+        const renderResultsPage = () => {
+            const totalItems = currentResults.length;
+            const totalPages = Math.ceil(totalItems / RESULTS_PER_PAGE) || 1;
+
+            currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+            const start = (currentPage - 1) * RESULTS_PER_PAGE;
+            const paginatedResults = currentResults.slice(start, start + RESULTS_PER_PAGE);
+
+            resultsContainer.innerHTML = paginatedResults.map(result => {
                 return `
                     <div class="card text-left space-y-4 cursor-pointer hover:border-green-400" data-competitor-key="${result.key}">
                         <div class="space-y-1">
@@ -351,6 +384,21 @@ async function setupResultsPage() {
                     </div>
                 `;
             }).join('');
+
+            updateNavigation(totalItems, totalPages);
+        };
+
+        const renderResults = (dataToRender) => {
+            currentResults = dataToRender;
+            currentPage = 1;
+
+            if (dataToRender.length === 0) {
+                resultsContainer.innerHTML = '<p class="col-span-full text-gray-400">No se encontraron resultados para tu búsqueda.</p>';
+                hideResultsNavigation();
+                return;
+            }
+
+            renderResultsPage();
         };
 
         const totalCompetitors = combinedData.length;
@@ -359,6 +407,7 @@ async function setupResultsPage() {
         const minLengthMessage = `<p class="col-span-full text-gray-400">Escribe al menos ${minCharacters} caracteres antes de realizar la búsqueda.</p>`;
         const searchButton = document.getElementById('searchButton');
         resultsContainer.innerHTML = instructionsMessage;
+        hideResultsNavigation();
 
         const setSearchButtonState = (term) => {
             if (!searchButton) return;
@@ -368,11 +417,31 @@ async function setupResultsPage() {
             searchButton.classList.toggle('cursor-not-allowed', isDisabled);
         };
 
+        if (prevResultsButton) {
+            prevResultsButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    renderResultsPage();
+                }
+            });
+        }
+
+        if (nextResultsButton) {
+            nextResultsButton.addEventListener('click', () => {
+                const totalPages = Math.ceil(currentResults.length / RESULTS_PER_PAGE) || 1;
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    renderResultsPage();
+                }
+            });
+        }
+
         const handleSearch = () => {
             const normalizedTerm = normalizeText(searchInput.value);
 
             if (normalizedTerm.length < minCharacters) {
                 resultsContainer.innerHTML = minLengthMessage;
+                hideResultsNavigation();
                 setSearchButtonState(normalizedTerm);
                 return;
             }
@@ -390,12 +459,14 @@ async function setupResultsPage() {
 
             if (!normalizedTerm) {
                 resultsContainer.innerHTML = instructionsMessage;
+                hideResultsNavigation();
                 setSearchButtonState(normalizedTerm);
                 return;
             }
 
             if (normalizedTerm.length < minCharacters) {
                 resultsContainer.innerHTML = minLengthMessage;
+                hideResultsNavigation();
             }
 
             setSearchButtonState(normalizedTerm);
@@ -538,6 +609,7 @@ async function setupResultsPage() {
         });
     } catch (error) {
         resultsContainer.innerHTML = '<p class="col-span-full text-red-500">Error al cargar los datos de resultados.</p>';
+        hideResultsNavigation();
         console.error('Error fetching results data:', error);
     }
 }
