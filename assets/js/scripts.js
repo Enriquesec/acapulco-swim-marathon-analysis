@@ -13,7 +13,7 @@ const extractYearFromEvent = (eventString = '') => {
 };
 
 const parseEventInfo = (eventString = '') => {
-    const eventPattern = /id=(\d+)_([\d]+)_maraton_acapulco_(\d{4})/i;
+    const eventPattern = /id=(\d+)_([\d]+)_mara[tó]n_acapulco_(\d{4})/i;
     const match = eventString.match(eventPattern);
 
     if (match) {
@@ -22,16 +22,21 @@ const parseEventInfo = (eventString = '') => {
             eventId,
             edition,
             year,
-            label: `${edition} Maratón ${year}`
+            label: `${edition} Maratón Acapulco ${year}`
         };
     }
 
+    const sanitizedEvent = eventString
+        .replace(/^id=/i, '')
+        .replace(/^\d+_?/, '')
+        .replace(/_/g, ' ')
+        .trim();
     const year = extractYearFromEvent(eventString);
     return {
-        eventId: eventString || null,
+        eventId: sanitizedEvent || null,
         edition: null,
         year,
-        label: eventString || 'Evento no especificado'
+        label: sanitizedEvent || 'Evento no especificado'
     };
 };
 
@@ -132,6 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function setupResultsPage() {
     const searchInput = document.getElementById('searchInput');
     const resultsContainer = document.getElementById('resultsContainer');
+    const paginationContainer = document.getElementById('resultsPagination');
+    const paginationInfo = document.getElementById('resultsPaginationInfo');
+    const paginationPrev = document.getElementById('resultsPrev');
+    const paginationNext = document.getElementById('resultsNext');
     const participantDetail = document.getElementById('participantDetail');
     const detailContent = document.getElementById('detailContent');
     const detailName = document.getElementById('detailName');
@@ -141,6 +150,9 @@ async function setupResultsPage() {
     const closeDetailButton = document.getElementById('closeParticipantDetail');
 
     let selectedParticipant = null;
+    let currentPage = 1;
+    let lastRenderedResults = [];
+    const RESULTS_PER_PAGE = 10;
 
     if (!searchInput || !resultsContainer) return;
 
@@ -184,8 +196,8 @@ async function setupResultsPage() {
         });
 
         const categories = sortedByYear
-            .map(record => record.category)
-            .filter(Boolean);
+            .map(record => deriveAgeGroup(record))
+            .filter(age => age && age !== 'Sin registro');
 
         if (!categories.length) return null;
 
@@ -323,79 +335,65 @@ async function setupResultsPage() {
         const aggregatedData = groupResultsByCompetitor(normalizedData);
         const combinedData = mergeParticipantsCatalog(aggregatedData, participantsCatalog);
 
-        const renderResults = (dataToRender) => {
-            if (dataToRender.length === 0) {
-                resultsContainer.innerHTML = '<p class="col-span-full text-gray-400">No se encontraron resultados para tu búsqueda.</p>';
+        const hidePagination = () => {
+            if (!paginationContainer) return;
+            paginationContainer.classList.add('hidden');
+        };
+
+        const renderPagination = (totalPages) => {
+            if (!paginationContainer) return;
+            if (totalPages <= 1) {
+                hidePagination();
                 return;
             }
 
-            resultsContainer.innerHTML = dataToRender.map(result => {
-                const groupedRecords = groupRecordsByEvent(result.records);
+            paginationContainer.classList.remove('hidden');
+            if (paginationInfo) {
+                paginationInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+            }
+            if (paginationPrev) {
+                paginationPrev.disabled = currentPage <= 1;
+            }
+            if (paginationNext) {
+                paginationNext.disabled = currentPage >= totalPages;
+            }
+        };
 
+        const renderResults = (dataToRender) => {
+            lastRenderedResults = dataToRender;
+
+            if (dataToRender.length === 0) {
+                resultsContainer.innerHTML = '<p class="col-span-full text-gray-400">No se encontraron resultados para tu búsqueda.</p>';
+                hidePagination();
+                return;
+            }
+
+            const totalPages = Math.ceil(dataToRender.length / RESULTS_PER_PAGE);
+            currentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1));
+
+            const start = (currentPage - 1) * RESULTS_PER_PAGE;
+            const end = start + RESULTS_PER_PAGE;
+            const pageResults = totalPages > 1 ? dataToRender.slice(start, end) : dataToRender;
+
+            resultsContainer.innerHTML = pageResults.map(result => {
                 return `
-                    <div class="card text-left space-y-4" data-competitor-key="${result.key}">
+                    <div class="card text-left space-y-4 cursor-pointer hover:border-green-400" data-competitor-key="${result.key}">
                         <div class="space-y-1">
                             <p class="text-xs uppercase tracking-wide text-green-400">Competidor</p>
                             <h3 class="text-2xl font-bold">${result.name}</h3>
-                            <p class="text-sm text-gray-300">${result.origin}</p>
-                            <p class="text-sm text-gray-400">${result.team}</p>
-                            <p class="text-xs text-gray-500">Participaciones: ${result.records.length}</p>
-                            <p class="text-xs text-gray-500">Sexo: ${result.gender || 'N/D'} · ${(() => {
-                                const categoryRange = getCategoryRange(result.records);
-                                if (categoryRange?.hasRange) {
-                                    return `Categorías: ${categoryRange.first} → ${categoryRange.last}`;
-                                }
-                                if (categoryRange?.first) {
-                                    return `Categoría: ${categoryRange.first}`;
-                                }
-                                return `Categoría: ${result.ageGroup || 'N/D'}`;
-                            })()}</p>
+                            <p class="text-sm text-gray-500">Sexo: ${result.gender || 'N/D'}</p>
+                            <p class="text-sm text-gray-500">Participaciones: ${result.records.length}</p>
                         </div>
                         ${result.records.length === 0 ? `
                             <div class="bg-gray-900 rounded-lg p-4 text-sm text-gray-400">
                                 Aún no registramos resultados históricos para este participante.
                             </div>
-                        ` : `
-                            <button class="w-full px-4 py-2 bg-green-500 text-gray-900 font-semibold rounded-lg hover:bg-green-400 transition view-participant">Ver detalle al estilo Strava</button>
-                            <div class="space-y-3">
-                                ${groupedRecords.map(group => `
-                                    <div class="bg-gray-900 rounded-lg p-3 space-y-2">
-                                        <div class="flex flex-wrap justify-between items-center gap-2">
-                                            <p class="text-lg font-semibold text-green-400">${group.label}</p>
-                                            <span class="text-sm font-bold">${group.items.length} participación${group.items.length !== 1 ? 'es' : ''}</span>
-                                        </div>
-                                        <div class="space-y-3">
-                                            ${group.items.map(record => `
-                                                <div class="bg-gray-800 rounded-lg p-3 space-y-2">
-                                                    <div class="flex flex-wrap justify-between items-center gap-2">
-                                                        <p class="text-base font-semibold">${record.year} · ${record.distance}</p>
-                                                        <span class="text-sm font-bold">${record.time}</span>
-                                                    </div>
-                                                    <p class="text-sm"><strong>Categoría:</strong> ${record.category}</p>
-                                                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                                                        <div class="bg-gray-900 rounded-md py-2">
-                                                            <p class="text-gray-400">Cat.</p>
-                                                            <p class="text-base font-bold">${record.positionCategory}</p>
-                                                        </div>
-                                                        <div class="bg-gray-900 rounded-md py-2">
-                                                            <p class="text-gray-400">Rama</p>
-                                                            <p class="text-base font-bold">${record.positionGender}</p>
-                                                        </div>
-                                                        <div class="bg-gray-900 rounded-md py-2">
-                                                            <p class="text-gray-400">Gral.</p>
-                                                            <p class="text-base font-bold">${record.positionGeneral}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `}
+                        ` : ''}
                     </div>
                 `;
             }).join('');
+
+            renderPagination(totalPages);
         };
 
         const totalCompetitors = combinedData.length;
@@ -404,6 +402,7 @@ async function setupResultsPage() {
         const minLengthMessage = `<p class="col-span-full text-gray-400">Escribe al menos ${minCharacters} caracteres antes de realizar la búsqueda.</p>`;
         const searchButton = document.getElementById('searchButton');
         resultsContainer.innerHTML = instructionsMessage;
+        hidePagination();
 
         const setSearchButtonState = (term) => {
             if (!searchButton) return;
@@ -419,6 +418,7 @@ async function setupResultsPage() {
             if (normalizedTerm.length < minCharacters) {
                 resultsContainer.innerHTML = minLengthMessage;
                 setSearchButtonState(normalizedTerm);
+                hidePagination();
                 return;
             }
 
@@ -426,6 +426,7 @@ async function setupResultsPage() {
                 result.searchIndex && result.searchIndex.includes(normalizedTerm)
             );
 
+            currentPage = 1;
             renderResults(filteredResults);
             setSearchButtonState(normalizedTerm);
         };
@@ -436,6 +437,7 @@ async function setupResultsPage() {
             if (!normalizedTerm) {
                 resultsContainer.innerHTML = instructionsMessage;
                 setSearchButtonState(normalizedTerm);
+                hidePagination();
                 return;
             }
 
@@ -457,6 +459,23 @@ async function setupResultsPage() {
             searchButton.addEventListener('click', handleSearch);
         }
 
+        if (paginationPrev) {
+            paginationPrev.addEventListener('click', () => {
+                if (currentPage <= 1) return;
+                currentPage -= 1;
+                renderResults(lastRenderedResults);
+            });
+        }
+
+        if (paginationNext) {
+            paginationNext.addEventListener('click', () => {
+                const totalPages = Math.ceil(lastRenderedResults.length / RESULTS_PER_PAGE);
+                if (currentPage >= totalPages) return;
+                currentPage += 1;
+                renderResults(lastRenderedResults);
+            });
+        }
+
         const renderParticipantDetail = (participant) => {
             if (!participantDetail || !detailContent) return;
 
@@ -469,15 +488,15 @@ async function setupResultsPage() {
                 ? `${categoryRange.first} → ${categoryRange.last}`
                 : (categoryRange?.first || participant.ageGroup || 'N/D');
 
-            detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Categoría/Edad: ${categorySummary}`;
+            detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Edad: ${categorySummary}`;
 
-            const availableCategories = Array.from(new Set(participant.records
-                .map(record => record.category)
-                .filter(Boolean)));
+            const availableAgeGroups = Array.from(new Set(participant.records
+                .map(record => deriveAgeGroup(record))
+                .filter(age => age && age !== 'Sin registro')));
 
             if (detailCategoryFilter) {
-                detailCategoryFilter.innerHTML = '<option value="">Todas las categorías</option>' +
-                    availableCategories.map(category => `<option value="${category}">${category}</option>`).join('');
+                detailCategoryFilter.innerHTML = '<option value="">Todas las edades</option>' +
+                    availableAgeGroups.map(age => `<option value="${age}">${age}</option>`).join('');
                 detailCategoryFilter.value = '';
             }
             if (detailDistanceFilter) {
@@ -490,7 +509,8 @@ async function setupResultsPage() {
                 const distanceFilter = detailDistanceFilter?.value || '';
 
                 const filtered = selectedParticipant.records.filter(record => {
-                    const matchesCategory = categoryFilter ? record.category === categoryFilter || (record.ageGroup && record.ageGroup.includes(categoryFilter)) : true;
+                    const recordAge = deriveAgeGroup(record);
+                    const matchesCategory = categoryFilter ? recordAge === categoryFilter : true;
                     const normalizedDistance = normalizeDistanceLabel(record.distance);
                     const matchesDistance = distanceFilter ? normalizedDistance === distanceFilter : true;
                     return matchesCategory && matchesDistance;
@@ -571,14 +591,13 @@ async function setupResultsPage() {
         };
 
         resultsContainer.addEventListener('click', (event) => {
-            const actionButton = event.target.closest('.view-participant');
             const card = event.target.closest('[data-competitor-key]');
-            if (actionButton && card) {
-                const key = card.getAttribute('data-competitor-key');
-                const participant = combinedData.find(item => item.key === key);
-                if (participant) {
-                    renderParticipantDetail(participant);
-                }
+            if (!card) return;
+
+            const key = card.getAttribute('data-competitor-key');
+            const participant = combinedData.find(item => item.key === key);
+            if (participant) {
+                renderParticipantDetail(participant);
             }
         });
     } catch (error) {

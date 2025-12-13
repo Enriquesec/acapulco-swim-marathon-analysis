@@ -27,6 +27,16 @@
         <!-- Los resultados de la búsqueda se insertarán aquí -->
     </div>
 
+    <div id="resultsPagination" class="flex items-center justify-between mt-6 text-sm text-gray-300 hidden">
+        <button id="resultsPrev" class="px-3 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" type="button">
+            Anterior
+        </button>
+        <p id="resultsPaginationInfo" class="text-gray-400">Página 1 de 1</p>
+        <button id="resultsNext" class="px-3 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" type="button">
+            Siguiente
+        </button>
+    </div>
+
     <!-- Panel detallado del participante al estilo Strava -->
     <div id="participantDetail" class="mt-10 bg-gray-900/70 backdrop-blur rounded-xl border border-gray-800 p-6 hidden">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -40,9 +50,9 @@
 
         <div class="grid md:grid-cols-3 gap-4 mb-4">
             <div class="col-span-2 space-y-2">
-                <p class="text-xs text-gray-400">Filtro por categoría/edad</p>
+                <p class="text-xs text-gray-400">Filtro por edad</p>
                 <select id="detailCategoryFilter" class="w-full bg-gray-800 text-white p-3 rounded-lg">
-                    <option value="">Todas las categorías</option>
+                    <option value="">Todas las edades</option>
                 </select>
             </div>
             <div class="space-y-2">
