@@ -141,6 +141,8 @@ async function setupResultsPage() {
     const detailContent = document.getElementById('detailContent');
     const detailName = document.getElementById('detailName');
     const detailMeta = document.getElementById('detailMeta');
+    const detailOrigin = document.getElementById('detailOrigin');
+    const detailTeam = document.getElementById('detailTeam');
     const detailCategoryFilter = document.getElementById('detailCategoryFilter');
     const detailDistanceFilter = document.getElementById('detailDistanceFilter');
     const closeDetailButton = document.getElementById('closeParticipantDetail');
@@ -306,7 +308,7 @@ async function setupResultsPage() {
                 if (!existing.gender || existing.gender === '—') {
                     existing.gender = participantInfo.gender;
                 }
-                if (!existing.ageGroup || existing.ageGroup === '—') {
+                if (participantInfo.ageGroup && participantInfo.ageGroup !== '—') {
                     existing.ageGroup = participantInfo.ageGroup;
                 }
                 updateSearchIndex(existing);
@@ -489,13 +491,20 @@ async function setupResultsPage() {
             selectedParticipant = participant;
             participantDetail.classList.remove('hidden');
             detailName.textContent = participant.name;
+            if (detailOrigin) {
+                detailOrigin.textContent = participant.origin || 'N/D';
+            }
+            if (detailTeam) {
+                detailTeam.textContent = participant.team || 'Sin equipo';
+            }
 
             const categoryRange = getCategoryRange(participant.records);
+            const catalogAge = participant.ageGroup && participant.ageGroup !== '—' ? participant.ageGroup : null;
             const categorySummary = categoryRange?.hasRange
                 ? `${categoryRange.first} → ${categoryRange.last}`
-                : (categoryRange?.first || participant.ageGroup || 'N/D');
+                : (categoryRange?.first || 'N/D');
 
-            detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Edad: ${categorySummary}`;
+            detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Edad: ${catalogAge || categorySummary}`;
 
             const availableAgeGroups = Array.from(new Set(participant.records
                 .map(record => deriveAgeGroup(record))
@@ -551,7 +560,7 @@ async function setupResultsPage() {
                                     <div class="bg-gray-800/60 rounded-lg p-3">
                                         <div class="flex flex-wrap items-center justify-between gap-2">
                                             <div>
-                                                <p class="text-base font-semibold">${record.year} · ${record.event}</p>
+                                                <p class="text-base font-semibold">${record.year} · ${record.eventEdition ? `${record.eventEdition} Maratón Acapulco` : record.event}</p>
                                                 <p class="text-xs text-gray-400">Categoría: ${record.category}</p>
                                             </div>
                                             <p class="text-lg font-bold text-green-400">${record.time}</p>
