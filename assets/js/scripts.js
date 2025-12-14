@@ -723,14 +723,24 @@ const deriveAgeGroup = (record) => {
     return record.ageGroup || 'Sin registro';
 };
 
-const buildParticipantKey = (record) => {
+const buildParticipantKey = (recordOrId, fallbackName = '') => {
+    if (!recordOrId) {
+        return normalizeText(fallbackName);
+    }
+
+    if (typeof recordOrId === 'string' || typeof recordOrId === 'number') {
+        return normalizeText(recordOrId);
+    }
+
+    const record = recordOrId;
+
     return (
         record.participant_id ||
         record.participantId ||
         record['número_de_competidor'] ||
         record.numero_de_competidor ||
         record.bib ||
-        normalizeText(record.nombre_completo || record.name || '')
+        normalizeText(record.nombre_completo || record.name || fallbackName)
     );
 };
 
@@ -770,7 +780,7 @@ const normalizeRecordForStats = (record) => {
     const category = record.categoria || record.category || 'Categoría N/D';
 
     return {
-        participantKey: buildParticipantKey(record.participant_id || record.participantId, record.nombre_completo || record.name),
+        participantKey: buildParticipantKey(record, record.nombre_completo || record.name),
         name: record.nombre_completo || record.name || 'Sin nombre',
         gender,
         ageGroup: deriveAgeGroup(record),
@@ -828,6 +838,37 @@ const aggregateParticipantsByYear = (records) => {
         });
 };
 
+const aggregateParticipantsByEvent = (records) => {
+    const eventMap = new Map();
+
+    records.forEach(record => {
+        if (!record) return;
+        const key = record.eventKey || record.event || record.year || 'Evento N/D';
+
+        if (!eventMap.has(key)) {
+            eventMap.set(key, {
+                key,
+                label: record.event || 'Evento no especificado',
+                year: record.year ? parseInt(record.year, 10) || 0 : 0,
+                participants: new Set()
+            });
+        }
+
+        eventMap.get(key).participants.add(record.participantKey);
+    });
+
+    return Array.from(eventMap.values())
+        .map(event => ({
+            label: event.label,
+            year: event.year,
+            count: event.participants.size
+        }))
+        .sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.label.localeCompare(b.label);
+        });
+};
+
 const aggregateGenderDistribution = (records) => {
     return records.reduce((acc, record) => {
         if (!record) return acc;
@@ -861,24 +902,66 @@ const aggregateAgeDistribution = (records) => {
     }, {});
 };
 
-const buildTimeHistogram = (values, binSize = 5) => {
+const getTimeLimitForRecord = (record) => {
+    const distance = (record?.distance || '').toUpperCase();
+
+    if (distance === '1K') return 60;
+    if (distance === '5K') return 240;
+
+    return null;
+};
+
+const buildTimeHistogram = (values, binSize = 5, customRange = null) => {
     if (!values.length) {
-        return { labels: [], counts: [] };
+        return { labels: [], counts: [], range: null };
     }
 
-    const min = Math.max(0, Math.floor(Math.min(...values) / binSize) * binSize);
-    const max = Math.ceil(Math.max(...values) / binSize) * binSize;
+    const minValue = customRange && typeof customRange.min === 'number'
+        ? customRange.min
+        : Math.max(0, Math.floor(Math.min(...values) / binSize) * binSize);
+
+    const maxValue = customRange && typeof customRange.max === 'number'
+        ? customRange.max
+        : Math.ceil(Math.max(...values) / binSize) * binSize;
+
+    if (maxValue <= minValue) {
+        return { labels: [], counts: [], range: null };
+    }
+
     const labels = [];
     const counts = [];
 
-    for (let start = min; start < max; start += binSize) {
+    for (let start = minValue; start < maxValue; start += binSize) {
         const end = start + binSize;
         labels.push(`${start}-${end} min`);
-        const count = values.filter(value => value >= start && (value < end || (end === max && value <= end))).length;
+        const count = values.filter(value => value >= start && (value < end || (end === maxValue && value <= end))).length;
         counts.push(count);
     }
 
-    return { labels, counts };
+    return { labels, counts, range: { min: minValue, max: maxValue } };
+};
+
+const getTimesByGenderWithinLimits = (records) => {
+    const grouped = { overall: [], male: [], female: [] };
+
+    records.forEach(record => {
+        const time = record?.timeMinutes;
+        const limit = getTimeLimitForRecord(record);
+
+        if (typeof time !== 'number' || Number.isNaN(time)) return;
+        if (limit && time > limit) return;
+
+        grouped.overall.push(time);
+
+        const normalizedGender = normalizeText(record.gender);
+        if (normalizedGender.startsWith('fe')) {
+            grouped.female.push(time);
+        } else if (normalizedGender.includes('var') || normalizedGender.startsWith('ma')) {
+            grouped.male.push(time);
+        }
+    });
+
+    return grouped;
 };
 
 const populateSelect = (id, data, placeholder, getValue, getLabel) => {
@@ -1190,8 +1273,9 @@ const renderOneKTimeChart = (records, statusElement) => {
     if (!canvas) return;
 
     const validTimes = records
-        .map(record => record.timeMinutes)
-        .filter(value => typeof value === 'number' && !Number.isNaN(value));
+        .map(record => ({ time: record.timeMinutes, limit: getTimeLimitForRecord(record) }))
+        .filter(({ time, limit }) => typeof time === 'number' && !Number.isNaN(time) && (!limit || time <= limit))
+        .map(item => item.time);
 
     if (oneKTimeChartInstance) {
         oneKTimeChartInstance.destroy();
@@ -1245,9 +1329,8 @@ const renderChronologyTimeChart = (records, statusElement) => {
     const canvas = document.getElementById('chronologyTimeChart');
     if (!canvas) return;
 
-    const validTimes = records
-        .map(record => record.timeMinutes)
-        .filter(value => typeof value === 'number' && !Number.isNaN(value));
+    const timesByGender = getTimesByGenderWithinLimits(records);
+    const validTimes = timesByGender.overall;
 
     if (chronologyTimeChartInstance) {
         chronologyTimeChartInstance.destroy();
@@ -1268,21 +1351,35 @@ const renderChronologyTimeChart = (records, statusElement) => {
     }
 
     const histogram = buildTimeHistogram(validTimes, 5);
+    const femaleHistogram = buildTimeHistogram(timesByGender.female, 5, histogram.range);
+    const maleHistogram = buildTimeHistogram(timesByGender.male, 5, histogram.range);
 
     chronologyTimeChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: histogram.labels,
-            datasets: [{
-                label: 'Participantes',
-                data: histogram.counts,
-                backgroundColor: '#9f7aea'
-            }]
+            datasets: [
+                {
+                    label: 'Total',
+                    data: histogram.counts,
+                    backgroundColor: 'rgba(159, 122, 234, 0.6)'
+                },
+                {
+                    label: 'Mujeres',
+                    data: femaleHistogram.labels.length ? femaleHistogram.counts : new Array(histogram.labels.length).fill(0),
+                    backgroundColor: 'rgba(72, 187, 120, 0.7)'
+                },
+                {
+                    label: 'Hombres',
+                    data: maleHistogram.labels.length ? maleHistogram.counts : new Array(histogram.labels.length).fill(0),
+                    backgroundColor: 'rgba(248, 180, 0, 0.7)'
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { legend: { labels: { color: '#e2e8f0' } } },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -1296,7 +1393,7 @@ const renderChronologyTimeChart = (records, statusElement) => {
     });
 };
 
-const renderYearTrendChart = (data) => {
+const renderEventTrendChart = (data) => {
     const canvas = document.getElementById('chronologyTrendChart');
     if (!canvas) return;
 
@@ -1310,9 +1407,9 @@ const renderYearTrendChart = (data) => {
     yearTrendChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
-            labels: data.map(item => item.year),
+            labels: data.map(item => item.label),
             datasets: [{
-                label: 'Participantes únicos',
+                label: 'Participantes únicos por evento',
                 data: data.map(item => item.count),
                 borderColor: '#48bb78',
                 backgroundColor: 'rgba(72, 187, 120, 0.2)',
@@ -1378,7 +1475,7 @@ async function initializeChronology() {
         setTextContent('summary-5k', fiveKParticipants || '0');
 
         renderChronologyAgeChart(normalizedRecords);
-        renderYearTrendChart(aggregateParticipantsByYear(normalizedRecords));
+        renderEventTrendChart(aggregateParticipantsByEvent(normalizedRecords));
 
         const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.category))).filter(Boolean).sort();
         const eventOptions = events.map(event => {
