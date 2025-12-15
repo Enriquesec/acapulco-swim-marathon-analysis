@@ -60,13 +60,12 @@
     <section aria-label="Filtros de cronología" class="bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
         <div class="flex items-center justify-between flex-wrap gap-3">
             <h3 class="text-lg font-semibold text-green-400">Filtrar resultados</h3>
-            <p class="text-sm text-gray-400">Selecciona evento, sexo, rama y distancia. Cada lista incluye la opción "Todos".</p>
+            <p class="text-sm text-gray-400">Selecciona el evento (el más reciente se elige por defecto), sexo y rama.</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
                 <label for="chronologyEventFilter" class="block text-sm font-medium text-white mb-1">Evento</label>
                 <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Todos</option>
                 </select>
             </div>
             <div>
@@ -78,12 +77,6 @@
             <div>
                 <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Rama</label>
                 <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div>
-                <label for="chronologyDistanceFilter" class="block text-sm font-medium text-white mb-1">Distancia</label>
-                <select id="chronologyDistanceFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
                     <option value="">Todos</option>
                 </select>
             </div>
@@ -110,16 +103,30 @@
                 <p id="filtered-male" class="text-3xl font-bold text-green-500 mt-1">—</p>
             </div>
         </div>
-        <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos</h3>
-                    <p class="text-sm text-gray-400">Histograma de los tiempos registrados para los filtros actuales.</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 1K</h3>
+                        <p class="text-sm text-gray-400">Histograma por sexo para la distancia de 1K.</p>
+                    </div>
+                    <p id="chronologyTimeStatus1k" class="text-sm text-gray-400 hidden">—</p>
                 </div>
-                <p id="chronologyTimeStatus" class="text-sm text-gray-400 hidden">—</p>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTimeChart1k" class="chart-canvas"></canvas>
+                </div>
             </div>
-            <div class="chart-wrapper mt-4">
-                <canvas id="chronologyTimeChart" class="chart-canvas"></canvas>
+            <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 5K</h3>
+                        <p class="text-sm text-gray-400">Histograma por sexo para la distancia de 5K.</p>
+                    </div>
+                    <p id="chronologyTimeStatus5k" class="text-sm text-gray-400 hidden">—</p>
+                </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTimeChart5k" class="chart-canvas"></canvas>
+                </div>
             </div>
         </div>
     </section>
