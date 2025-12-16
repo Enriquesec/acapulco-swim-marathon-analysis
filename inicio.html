@@ -31,6 +31,31 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 lg:col-span-2">
                     <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-green-400">Participantes por evento</h3>
+                        <span class="text-xs text-gray-400">Edición a edición</span>
+                    </div>
+                    <div class="chart-wrapper mt-2 h-60">
+                        <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-green-400">Mapa de procedencias</h3>
+                        <span class="text-xs text-gray-400">Referencial</span>
+                    </div>
+                    <div class="overflow-hidden rounded-lg border border-gray-700 shadow-inner">
+                        <iframe id="stateMapEmbed" class="w-full h-64 map-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30050.040800734227!2d-99.91836504953898!3d16.86146527569212!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ca5f1cf0c712ad%3A0x402a359351a8fc0!2sAcapulco%20de%20Ju%C3%A1rez%2C%20Gro.!5e0!3m2!1ses-419!2smx!4v1718150400000!5m2!1ses-419!2smx" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase text-gray-400">Estados con más presencia</p>
+                        <ul id="stateTopList" class="text-sm text-gray-200 mt-1 space-y-1"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 lg:col-span-2">
+                    <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
                         <span class="text-xs text-gray-400">General</span>
                     </div>
@@ -58,31 +83,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 lg:col-span-2">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-green-400">Participantes por evento</h3>
-                        <span class="text-xs text-gray-400">Edición a edición</span>
-                    </div>
-                    <div class="chart-wrapper mt-2 h-60">
-                        <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-                <div class="bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-green-400">Mapa por estado</h3>
-                        <span class="text-xs text-gray-400">Participantes únicos</span>
-                    </div>
-                    <div class="state-map-wrapper bg-gray-900 rounded-md p-3">
-                        <div id="stateMapGrid" class="state-grid"></div>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase text-gray-400">Estados con más presencia</p>
-                        <ul id="stateTopList" class="text-sm text-gray-200 mt-1 space-y-1"></ul>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="xl:col-span-4 space-y-4">
@@ -103,9 +103,9 @@
                         </select>
                     </div>
                     <div>
-                        <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Rama</label>
+                        <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Categoría de edad</label>
                         <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="">Todos</option>
+                            <option value="">Todas</option>
                         </select>
                     </div>
                 </div>
