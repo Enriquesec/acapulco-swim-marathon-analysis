@@ -10,7 +10,7 @@
         </div>
     </section>
 
-    <section class="grid gap-4 lg:grid-cols-3">
+    <section class="grid gap-4 lg:grid-cols-2">
         <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-lg space-y-1">
             <p class="text-xs uppercase text-gray-400">Participantes con medallas</p>
             <p id="honorBoardAthletes" class="text-3xl font-extrabold text-green-400">—</p>
@@ -21,20 +21,22 @@
             <p id="honorBoardTotalMedals" class="text-3xl font-extrabold text-yellow-400">—</p>
             <p class="text-sm text-gray-400">Suma de todos los podios (1° a 6° lugares).</p>
         </div>
-        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-lg space-y-1">
-            <p class="text-xs uppercase text-gray-400">Líder en oro</p>
-            <p id="honorBoardTopGold" class="text-2xl font-bold text-white">—</p>
-            <p class="text-sm text-gray-400">Se priorizan los oros sobre cualquier otra medalla.</p>
-        </div>
     </section>
 
     <section class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="space-y-1">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Ordenado por peso de medallas</p>
-                <h2 class="text-2xl font-semibold text-green-400">Top históricamente más laureados</h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-2xl font-semibold text-green-400">Top históricamente más laureados</h2>
+                    <span class="px-3 py-1 rounded-full bg-gray-700 text-xs text-gray-200">Oro > Plata > Bronce > 4° > 5° > 6°</span>
+                </div>
             </div>
-            <span class="px-3 py-1 rounded-full bg-gray-700 text-xs text-gray-200">Oro > Plata > Bronce > 4° > 5° > 6°</span>
+            <div class="flex items-center gap-2">
+                <button id="honorBoardPrev" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 focus:outline-none focus:ring focus:ring-green-500/40" aria-label="Ver medallistas anteriores">◀</button>
+                <span id="honorBoardSlideInfo" class="text-sm text-gray-300">Mostrando 10 medallistas</span>
+                <button id="honorBoardNext" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 focus:outline-none focus:ring focus:ring-green-500/40" aria-label="Ver medallistas siguientes">▶</button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">

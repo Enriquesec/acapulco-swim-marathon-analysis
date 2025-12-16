@@ -1854,6 +1854,10 @@ async function initializeHonorBoard() {
     const tableBody = document.getElementById('honorBoardBody');
     if (!tableBody) return;
 
+    const prevButton = document.getElementById('honorBoardPrev');
+    const nextButton = document.getElementById('honorBoardNext');
+    const slideInfo = document.getElementById('honorBoardSlideInfo');
+
     tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-gray-400">Calculando medallero...</td></tr>';
 
     try {
@@ -1867,35 +1871,85 @@ async function initializeHonorBoard() {
         }
 
         const totalMedals = rankedMedalists.reduce((sum, athlete) => sum + athlete.total, 0);
-        const topGold = rankedMedalists[0];
 
         setTextContent('honorBoardAthletes', formatNumber(rankedMedalists.length));
         setTextContent('honorBoardTotalMedals', formatNumber(totalMedals));
-        setTextContent('honorBoardTopGold', `${topGold.name} · ${formatNumber(topGold.medals[0])} oros`);
 
-        const rows = rankedMedalists.slice(0, 100).map((athlete, index) => {
-            const [gold, silver, bronze, fourth, fifth, sixth] = athlete.medals;
-            const highlight = index < 3 ? 'bg-gray-900/40' : '';
+        const pageSize = 10;
+        const totalSlides = Math.ceil(rankedMedalists.length / pageSize);
+        let currentSlide = 0;
 
-            return `
-                <tr class="border-b border-gray-800 ${highlight}">
-                    <td class="py-3 px-2 text-sm text-gray-400">${index + 1}</td>
-                    <td class="py-3 px-2">
-                        <div class="font-semibold text-white">${athlete.name}</div>
-                        <p class="text-xs text-gray-400">${athlete.origin || 'Procedencia no registrada'}</p>
-                    </td>
-                    <td class="py-3 px-2 text-center text-yellow-300 font-semibold">${formatNumber(gold)}</td>
-                    <td class="py-3 px-2 text-center text-gray-200">${formatNumber(silver)}</td>
-                    <td class="py-3 px-2 text-center text-orange-300">${formatNumber(bronze)}</td>
-                    <td class="py-3 px-2 text-center">${formatNumber(fourth)}</td>
-                    <td class="py-3 px-2 text-center">${formatNumber(fifth)}</td>
-                    <td class="py-3 px-2 text-center">${formatNumber(sixth)}</td>
-                    <td class="py-3 px-2 text-center font-semibold text-green-400">${formatNumber(athlete.total)}</td>
-                </tr>
-            `;
-        }).join('');
+        const updateButtons = () => {
+            if (prevButton) {
+                prevButton.disabled = currentSlide === 0;
+                prevButton.classList.toggle('opacity-50', currentSlide === 0);
+                prevButton.classList.toggle('cursor-not-allowed', currentSlide === 0);
+            }
 
-        tableBody.innerHTML = rows;
+            if (nextButton) {
+                nextButton.disabled = currentSlide >= totalSlides - 1;
+                nextButton.classList.toggle('opacity-50', currentSlide >= totalSlides - 1);
+                nextButton.classList.toggle('cursor-not-allowed', currentSlide >= totalSlides - 1);
+            }
+        };
+
+        const renderSlide = () => {
+            const startIndex = currentSlide * pageSize;
+            const currentMedalists = rankedMedalists.slice(startIndex, startIndex + pageSize);
+
+            const rows = currentMedalists.map((athlete, index) => {
+                const [gold, silver, bronze, fourth, fifth, sixth] = athlete.medals;
+                const position = startIndex + index + 1;
+                const highlight = position <= 3 ? 'bg-gray-900/40' : '';
+
+                return `
+                    <tr class="border-b border-gray-800 ${highlight}">
+                        <td class="py-3 px-2 text-sm text-gray-400">${position}</td>
+                        <td class="py-3 px-2">
+                            <div class="font-semibold text-white">${athlete.name}</div>
+                            <p class="text-xs text-gray-400">${athlete.origin || 'Procedencia no registrada'}</p>
+                        </td>
+                        <td class="py-3 px-2 text-center text-yellow-300 font-semibold">${formatNumber(gold)}</td>
+                        <td class="py-3 px-2 text-center text-gray-200">${formatNumber(silver)}</td>
+                        <td class="py-3 px-2 text-center text-orange-300">${formatNumber(bronze)}</td>
+                        <td class="py-3 px-2 text-center">${formatNumber(fourth)}</td>
+                        <td class="py-3 px-2 text-center">${formatNumber(fifth)}</td>
+                        <td class="py-3 px-2 text-center">${formatNumber(sixth)}</td>
+                        <td class="py-3 px-2 text-center font-semibold text-green-400">${formatNumber(athlete.total)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tableBody.innerHTML = rows;
+
+            if (slideInfo) {
+                const startDisplay = startIndex + 1;
+                const endDisplay = Math.min(startIndex + currentMedalists.length, rankedMedalists.length);
+                slideInfo.textContent = `Mostrando ${startDisplay}-${endDisplay} de ${formatNumber(rankedMedalists.length)} medallistas`;
+            }
+
+            updateButtons();
+        };
+
+        if (prevButton) {
+            prevButton.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide -= 1;
+                    renderSlide();
+                }
+            });
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide += 1;
+                    renderSlide();
+                }
+            });
+        }
+
+        renderSlide();
     } catch (error) {
         console.error('Error al construir medallero:', error);
         tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-red-500">No se pudo cargar el medallero.</td></tr>';
