@@ -7,6 +7,12 @@ const normalizeText = (text = '') => text
 
 const buildSearchIndex = (...fields) => normalizeText(fields.filter(Boolean).join(' '));
 
+const numberFormatter = new Intl.NumberFormat('es-MX');
+const formatNumber = (value) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return '0';
+    return numberFormatter.format(value);
+};
+
 const extractYearFromEvent = (eventString = '') => {
     const match = eventString.match(/(19|20)\d{2}/);
     return match ? match[0] : 'Año N/D';
@@ -101,7 +107,8 @@ const pointValueLabelPlugin = {
                 ctx.font = 'bold 12px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
-                ctx.fillText(value, element.x, element.y - 6);
+                const label = typeof value === 'number' ? formatNumber(value) : value;
+                ctx.fillText(label, element.x, element.y - 6);
             });
         });
         ctx.restore();
@@ -803,6 +810,7 @@ const normalizeRecordForStats = (record) => {
     const eventName = record.evento || record.event || 'Evento no especificado';
     const eventInfo = parseEventInfo(eventName);
     const category = record.categoria || record.category || 'Categoría N/D';
+    const origin = record.procedencia || record.estado_estandarizado || record.origin || record.procedencias?.[0] || '';
 
     return {
         participantKey: buildParticipantKey(record, record.nombre_completo || record.name),
@@ -814,7 +822,8 @@ const normalizeRecordForStats = (record) => {
         event: eventInfo.label,
         eventKey: buildEventKey(eventInfo, eventName),
         timeMinutes: parseResultTimeInMinutes(record),
-        year: eventInfo.year
+        year: eventInfo.year,
+        origin
     };
 };
 
@@ -892,6 +901,156 @@ const aggregateParticipantsByEvent = (records) => {
             if (a.year !== b.year) return a.year - b.year;
             return a.label.localeCompare(b.label);
         });
+};
+
+const stateKeywords = [
+    { name: 'Aguascalientes', keywords: ['aguascalientes'] },
+    { name: 'Baja California', keywords: ['baja california', 'tijuana', 'ensenada', 'mexicali'] },
+    { name: 'Baja California Sur', keywords: ['baja california sur', 'la paz', 'los cabos', 'cabo san lucas'] },
+    { name: 'Campeche', keywords: ['campeche'] },
+    { name: 'Chiapas', keywords: ['chiapas', 'tuxtla', 'san cristobal'] },
+    { name: 'Chihuahua', keywords: ['chihuahua', 'cd juarez', 'juarez'] },
+    { name: 'Ciudad de México', keywords: ['ciudad de mexico', 'cdmx', 'distrito federal', 'df'] },
+    { name: 'Coahuila', keywords: ['coahuila', 'saltillo', 'torreon'] },
+    { name: 'Colima', keywords: ['colima', 'manzanillo'] },
+    { name: 'Durango', keywords: ['durango'] },
+    { name: 'Guanajuato', keywords: ['guanajuato', 'leon', 'irapuato', 'celaya'] },
+    { name: 'Guerrero', keywords: ['guerrero', 'acapulco', 'chilpancingo', 'taxco'] },
+    { name: 'Hidalgo', keywords: ['hidalgo', 'pachuca', 'tula'] },
+    { name: 'Jalisco', keywords: ['jalisco', 'guadalajara', 'zapopan', 'puerto vallarta'] },
+    { name: 'Estado de México', keywords: ['estado de mexico', 'edomex', 'toluca', 'metepec', 'nezahualcoyotl', 'ecatepec'] },
+    { name: 'Michoacán', keywords: ['michoacan', 'morelia', 'uruapan'] },
+    { name: 'Morelos', keywords: ['morelos', 'cuernavaca', 'cuautla'] },
+    { name: 'Nayarit', keywords: ['nayarit', 'tepic', 'bahia de banderas'] },
+    { name: 'Nuevo León', keywords: ['nuevo leon', 'monterrey', 'apodaca', 'san nicolas'] },
+    { name: 'Oaxaca', keywords: ['oaxaca', 'oaxaca de juarez', 'huatulco'] },
+    { name: 'Puebla', keywords: ['puebla'] },
+    { name: 'Querétaro', keywords: ['queretaro'] },
+    { name: 'Quintana Roo', keywords: ['quintana roo', 'cancun', 'cozumel', 'tulum', 'solidaridad'] },
+    { name: 'San Luis Potosí', keywords: ['san luis potosi', 'slp', 'soledad'] },
+    { name: 'Sinaloa', keywords: ['sinaloa', 'culiacan', 'mazatlan', 'los mochis'] },
+    { name: 'Sonora', keywords: ['sonora', 'hermosillo', 'obregon', 'ciudad obregon', 'nogales'] },
+    { name: 'Tabasco', keywords: ['tabasco', 'villahermosa'] },
+    { name: 'Tamaulipas', keywords: ['tamaulipas', 'tampico', 'matamoros', 'reynosa'] },
+    { name: 'Tlaxcala', keywords: ['tlaxcala', 'apizaco'] },
+    { name: 'Veracruz', keywords: ['veracruz', 'xalapa', 'orizaba', 'poza rica', 'coatzacoalcos'] },
+    { name: 'Yucatán', keywords: ['yucatan', 'merida'] },
+    { name: 'Zacatecas', keywords: ['zacatecas'] }
+];
+
+const stateTileLayout = [
+    { code: 'BC', name: 'Baja California', row: 1, col: 2 },
+    { code: 'BS', name: 'Baja California Sur', row: 2, col: 2 },
+    { code: 'SO', name: 'Sonora', row: 1, col: 3 },
+    { code: 'CH', name: 'Chihuahua', row: 1, col: 4 },
+    { code: 'CO', name: 'Coahuila', row: 1, col: 5 },
+    { code: 'NL', name: 'Nuevo León', row: 1, col: 6 },
+    { code: 'TM', name: 'Tamaulipas', row: 1, col: 7 },
+    { code: 'SI', name: 'Sinaloa', row: 2, col: 3 },
+    { code: 'DU', name: 'Durango', row: 2, col: 4 },
+    { code: 'ZA', name: 'Zacatecas', row: 2, col: 5 },
+    { code: 'SL', name: 'San Luis Potosí', row: 2, col: 6 },
+    { code: 'VE', name: 'Veracruz', row: 2, col: 7 },
+    { code: 'NA', name: 'Nayarit', row: 3, col: 3 },
+    { code: 'JA', name: 'Jalisco', row: 3, col: 4 },
+    { code: 'AG', name: 'Aguascalientes', row: 3, col: 5 },
+    { code: 'GJ', name: 'Guanajuato', row: 3, col: 6 },
+    { code: 'HI', name: 'Hidalgo', row: 3, col: 7 },
+    { code: 'PU', name: 'Puebla', row: 3, col: 8 },
+    { code: 'CL', name: 'Colima', row: 4, col: 3 },
+    { code: 'MI', name: 'Michoacán', row: 4, col: 4 },
+    { code: 'QE', name: 'Querétaro', row: 4, col: 5 },
+    { code: 'ME', name: 'Estado de México', row: 4, col: 6 },
+    { code: 'CD', name: 'Ciudad de México', row: 4, col: 7 },
+    { code: 'TL', name: 'Tlaxcala', row: 4, col: 8 },
+    { code: 'MO', name: 'Morelos', row: 5, col: 6 },
+    { code: 'GU', name: 'Guerrero', row: 5, col: 5 },
+    { code: 'OA', name: 'Oaxaca', row: 5, col: 7 },
+    { code: 'TB', name: 'Tabasco', row: 5, col: 8 },
+    { code: 'CA', name: 'Campeche', row: 5, col: 9 },
+    { code: 'CI', name: 'Chiapas', row: 6, col: 9 },
+    { code: 'YU', name: 'Yucatán', row: 4, col: 9 },
+    { code: 'QR', name: 'Quintana Roo', row: 5, col: 10 }
+];
+
+const resolveStateFromOrigin = (origin = '') => {
+    const normalizedOrigin = normalizeText(origin);
+    if (!normalizedOrigin) return null;
+
+    const match = stateKeywords.find(state => state.keywords.some(keyword => normalizedOrigin.includes(keyword)));
+    return match?.name || null;
+};
+
+const aggregateParticipantsByState = (records = []) => {
+    const stateMap = new Map();
+
+    records.forEach(record => {
+        if (!record?.participantKey) return;
+        const stateName = resolveStateFromOrigin(record.origin);
+        if (!stateName) return;
+
+        if (!stateMap.has(stateName)) {
+            stateMap.set(stateName, new Set());
+        }
+
+        stateMap.get(stateName).add(record.participantKey);
+    });
+
+    return stateMap;
+};
+
+const getStateTileColor = (count, maxCount) => {
+    if (!count) return '#1f2937';
+    const ratio = maxCount ? count / maxCount : 0;
+    if (ratio > 0.7) {
+        return `rgba(248, 180, 0, ${0.35 + ratio * 0.4})`;
+    }
+    return `rgba(72, 187, 120, ${0.25 + ratio * 0.6})`;
+};
+
+const renderStateMap = (stateParticipantMap) => {
+    const grid = document.getElementById('stateMapGrid');
+    const list = document.getElementById('stateTopList');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    if (list) list.innerHTML = '';
+
+    const counts = stateTileLayout.map(tile => ({
+        ...tile,
+        count: stateParticipantMap.get(tile.name)?.size || 0
+    }));
+
+    const maxCount = Math.max(...counts.map(item => item.count), 0);
+
+    counts.forEach(tile => {
+        const tileElement = document.createElement('div');
+        tileElement.className = 'state-tile';
+        tileElement.style.gridColumn = tile.col;
+        tileElement.style.gridRow = tile.row;
+        tileElement.style.backgroundColor = getStateTileColor(tile.count, maxCount);
+        tileElement.style.borderColor = tile.count ? '#48bb78' : '#374151';
+        tileElement.title = `${tile.name}: ${formatNumber(tile.count)} participantes únicos`;
+        tileElement.innerHTML = `<div class="leading-tight text-center">${tile.code}<strong>${formatNumber(tile.count)}</strong></div>`;
+        grid.appendChild(tileElement);
+    });
+
+    const topStates = counts
+        .filter(item => item.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4);
+
+    if (list) {
+        if (!topStates.length) {
+            list.innerHTML = '<li class="text-gray-500">Sin procedencias registradas</li>';
+        } else {
+            topStates.forEach(state => {
+                const item = document.createElement('li');
+                item.textContent = `${state.name}: ${formatNumber(state.count)}`;
+                list.appendChild(item);
+            });
+        }
+    }
 };
 
 const summarizeGenderCounts = (records) => {
@@ -1243,7 +1402,7 @@ const renderGenderSummaryChart = (distribution, canvasId = 'genderSummaryChart')
     const counts = Object.values(distribution);
     if (!labels.length) return null;
 
-    const palette = ['#63b3ed', '#ed64a6', '#f6ad55', '#b794f4'];
+    const palette = ['rgba(72, 187, 120, 0.9)', 'rgba(248, 180, 0, 0.9)'];
 
     genderSummaryChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
@@ -1476,14 +1635,21 @@ const renderEventTrendChart = (data) => {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    labels: { color: '#e2e8f0' }
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${formatNumber(context.parsed.y)} participantes`
+                    }
                 }
             },
+            interaction: { mode: 'index', intersect: false },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: '#e2e8f0' }
+                    ticks: {
+                        color: '#e2e8f0',
+                        callback: value => formatNumber(value)
+                    }
                 },
                 x: {
                     ticks: { color: '#e2e8f0' }
@@ -1528,6 +1694,8 @@ async function initializeChronology() {
             Mujeres: genderSummary.femaleCount,
             Hombres: genderSummary.maleCount
         });
+
+        renderStateMap(aggregateParticipantsByState(normalizedRecords));
 
         const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
         const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
