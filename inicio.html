@@ -1,147 +1,158 @@
-<div class="container mx-auto">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="text-5xl md:text-7xl font-bold">Maratón Internacional Acapulco</h1>
-            <p class="text-2xl mt-4">Sitio oficial del maratón de aguas abiertas en la Bahía de Santa Lucía</p>
-        </div>
+<div class="container mx-auto space-y-8">
+    <section class="text-center pt-10">
+        <h1 class="text-5xl md:text-7xl font-bold">Maratón Internacional Acapulco</h1>
     </section>
 
-    <!-- Sección de Información y Requisitos -->
-    <section class="pt-16 pb-8">
-        <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg text-left -mt-40 md:-mt-32 relative z-10 shadow-2xl">
-            <p class="mb-4 text-lg">
-                Bienvenido al sitio oficial: aquí encuentras la cronología, los resultados y todo lo que necesitas para vivir el Maratón Internacional Acapulco.
-            </p>
-            <p class="mb-4 text-gray-300">
-                Es una travesía de aguas abiertas por la Bahía de Santa Lucía que honra la tradición guadalupana y celebra el nado en mar abierto con nadadores de todo el país.
-            </p>
-            <ul class="list-disc list-inside space-y-2 text-gray-200">
-                <li>Revisa rutas y distancias para elegir tu desafío (1 km o 5 km).</li>
-                <li>Consulta la cronología histórica y los resultados más recientes.</li>
-                <li>Infórmate sobre la próxima edición y la logística de salida y llegada.</li>
-            </ul>
-            <div class="text-center mt-8 flex flex-wrap justify-center gap-4">
-                <a data-target="cronologia.html" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 font-bold cursor-pointer">
-                    Explorar la cronología
-                </a>
-                <a data-target="resultados.html" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 font-bold cursor-pointer">
-                    Busca tus resultados
-                </a>
-                <a data-target="convocatoria.html" class="bg-yellow-500 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 font-bold cursor-pointer">
-                    Ver convocatoria
-                </a>
+    <header class="space-y-2 text-center">
+        <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Cronología</p>
+        <h2 class="text-3xl font-bold text-white">Explora la evolución del maratón</h2>
+        <p class="text-sm text-gray-400 max-w-3xl mx-auto">Consulta los picos de participación, filtra los datos por evento y descubre cómo se comportan los atletas por distancia, género y edad.</p>
+    </header>
+
+    <section aria-label="Resumen general" class="space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
+            <div class="space-y-4 xl:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-5 rounded-xl border border-gray-700 shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Eventos registrados</p>
+                            <p id="summary-events" class="text-4xl font-extrabold text-green-400 mt-1">—</p>
+                        </div>
+                        <div class="text-green-400 text-3xl" aria-hidden="true">◆</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-500 p-5 rounded-xl shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-900">Participantes únicos</p>
+                            <p id="summary-participants" class="text-4xl font-extrabold text-gray-900 mt-1">—</p>
+                        </div>
+                        <div class="text-gray-900 text-3xl" aria-hidden="true">★</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Participantes en 1K</p>
+                            <p id="summary-1k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">Ruta corta</span>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Participantes en 5K</p>
+                            <p id="summary-5k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">Ruta larga</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-md flex flex-col gap-4 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución por sexo</h3>
+                    <span class="text-xs text-gray-400">Participantes únicos</span>
+                </div>
+                <div class="chart-wrapper h-52">
+                    <canvas id="genderSummaryChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                    <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
+                        <span>Mujeres</span>
+                        <span id="summary-female" class="font-bold text-green-400">—</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
+                        <span>Hombres</span>
+                        <span id="summary-male" class="font-bold text-green-400">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
+                    <span class="text-xs text-gray-400">General</span>
+                </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Participantes por evento</h3>
+                    <span class="text-xs text-gray-400">Edición a edición</span>
+                </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Sección de Distancias -->
-    <section class="py-12 bg-gray-900">
-        <h2 class="text-3xl font-bold text-center text-green-400 mb-8">Nuestras Distancias</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <!-- Card 1K -->
-            <div class="card text-center">
-                <h3 class="text-2xl font-bold text-green-400">1 KM - Isla Roqueta a Playa Caleta</h3>
-                <img src="./assets/img/ruta-1km.jpeg" alt="Mapa de la ruta de 1 kilometro" class="rounded-lg my-4">
-                <p class="text-gray-300">Una prueba de velocidad y técnica en un entorno espectacular. Ideal para nadadores de todas las edades que buscan un reto emocionante.</p>
+    <section aria-label="Filtros de cronología" class="bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <h3 class="text-lg font-semibold text-green-400">Filtrar resultados</h3>
+            <p class="text-sm text-gray-400">Selecciona el evento (el más reciente se elige por defecto), sexo y rama.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <label for="chronologyEventFilter" class="block text-sm font-medium text-white mb-1">Evento</label>
+                <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                </select>
             </div>
-            <!-- Card 5K -->
-            <div class="card text-center">
-                <h3 class="text-2xl font-bold text-green-400">5 KM - Playa Caleta a Hotel Emporio</h3>
-                <img src="./assets/img/ruta-5km.jpeg" alt="Mapa de la ruta de 5 kilometros" class="rounded-lg my-4">
-                <p class="text-gray-300">El evento principal que recorre la hermosa bahía de Acapulco. Un desafío de resistencia para los nadadores más experimentados.</p>
+            <div>
+                <label for="chronologyGenderFilter" class="block text-sm font-medium text-white mb-1">Sexo</label>
+                <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
             </div>
+            <div>
+                <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Rama</label>
+                <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+        </div>
+        <div class="text-right">
+            <button id="applyChronologyFilters" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
+                Aplicar filtros
+            </button>
         </div>
     </section>
 
-    <!-- Sección Sobre el Maratón -->
-    <section class="py-12 text-center">
-        <h2 class="text-3xl font-bold text-center text-green-400 mb-8">Tradición y Pasión</h2>
-        <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
-            <img src="https://via.placeholder.com/800x400.png?text=Maratón+de+Acapulco" alt="Historia del Maratón" class="rounded-lg mb-6 w-full">
-            <p class="text-gray-300 text-left">
-                A casi seis décadas de existencia, el Maratón Guadalupano sigue convocando a nadadores de todo el país para cruzar la Bahía de Santa Lucía en honor a la Virgen de Guadalupe. La edición 2024 demostró que la pasión por Acapulco sigue intacta: recuperamos rutas, reforzamos la logística en mar abierto y cerramos con una emotiva ceremonia en Caleta. Muy pronto compartiremos la ruta oficial 2025 y nuevas sorpresas para quienes regresan cada diciembre.
-            </p>
+    <section aria-label="Resultados filtrados" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Participantes filtrados</p>
+                <p id="filtered-participants" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Mujeres</p>
+                <p id="filtered-female" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
+            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-400">Hombres</p>
+                <p id="filtered-male" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            </div>
         </div>
-    </section>
-
-    <!-- Sección de Galería -->
-    <section class="py-12">
-        <h2 class="text-3xl font-bold text-center text-green-400 mb-8">Galería</h2>
-        <div class="gallery-grid">
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+1" alt="Foto de la galería 1"></div>
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+2" alt="Foto de la galería 2"></div>
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+3" alt="Foto de la galería 3"></div>
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+4" alt="Foto de la galería 4"></div>
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+5" alt="Foto de la galería 5"></div>
-            <div class="gallery-item"><img src="https://via.placeholder.com/400x400.png?text=Foto+6" alt="Foto de la galería 6"></div>
-        </div>
-    </section>
-
-    <!-- Carrusel de Eventos -->
-    <section class="py-12">
-        <h2 class="text-3xl font-bold text-center text-green-400 mb-8">Ediciones Anteriores</h2>
-        <!-- Contenedor del Carrusel Swiper (clase actualizada a .swiper) -->
-        <div class="swiper">
-            <div class="swiper-wrapper">
-                <!-- Slide 1 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2024" alt="Edición 2024" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2024</h3>
-                        </div>
-                    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 1K</h3>
+                    <p id="chronologyTimeStatus1k" class="text-sm text-gray-400 hidden mt-1">—</p>
                 </div>
-                <!-- Slide 2 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2023" alt="Edición 2023" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2023</h3>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 3 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2022" alt="Edición 2022" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2022</h3>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 4 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2021" alt="Edición 2021" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2021</h3>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 5 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2020" alt="Edición 2020" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2020</h3>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 6 -->
-                <div class="swiper-slide">
-                    <div class="event-card">
-                        <img src="https://via.placeholder.com/300x300.png?text=Edición+2019" alt="Edición 2019" class="event-image">
-                        <div class="event-text">
-                            <h3 class="font-bold text-lg">Edición 2019</h3>
-                        </div>
-                    </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTimeChart1k" class="chart-canvas"></canvas>
                 </div>
             </div>
-            <!-- Botones de Navegación -->
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+            <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 5K</h3>
+                    <p id="chronologyTimeStatus5k" class="text-sm text-gray-400 hidden mt-1">—</p>
+                </div>
+                <div class="chart-wrapper mt-4">
+                    <canvas id="chronologyTimeChart5k" class="chart-canvas"></canvas>
+                </div>
+            </div>
         </div>
     </section>
 </div>
