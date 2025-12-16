@@ -104,7 +104,7 @@ const pointValueLabelPlugin = {
                 if (value === null || value === undefined) return;
 
                 ctx.fillStyle = '#e2e8f0';
-                ctx.font = 'bold 12px sans-serif';
+                ctx.font = 'bold 14px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 const label = typeof value === 'number' ? formatNumber(value) : value;
@@ -185,7 +185,6 @@ async function setupResultsPage() {
     const detailMeta = document.getElementById('detailMeta');
     const detailOrigin = document.getElementById('detailOrigin');
     const detailTeam = document.getElementById('detailTeam');
-    const detailCategoryFilter = document.getElementById('detailCategoryFilter');
     const detailDistanceFilter = document.getElementById('detailDistanceFilter');
     const closeDetailButton = document.getElementById('closeParticipantDetail');
     const resultsNavigation = document.getElementById('resultsNavigation');
@@ -263,14 +262,18 @@ async function setupResultsPage() {
                     eventId: record.eventId || key,
                     label: record.event || 'Evento no especificado',
                     year: parseInt(record.year, 10) || 0,
+                    edition: parseInt(record.eventEdition, 10) || 0,
                     items: []
                 });
             }
             eventGroups.get(key).items.push(record);
         });
 
-        const sortByYearDesc = (a, b) => b.year - a.year;
-        return Array.from(eventGroups.values()).sort(sortByYearDesc);
+        const sortByEdition = (a, b) => {
+            if (a.edition !== b.edition) return a.edition - b.edition;
+            return a.year - b.year;
+        };
+        return Array.from(eventGroups.values()).sort(sortByEdition);
     };
 
     const groupResultsByCompetitor = (data) => {
@@ -548,30 +551,18 @@ async function setupResultsPage() {
 
             detailMeta.textContent = `Participaciones: ${participant.records.length} · Procedencia: ${participant.origin || 'N/D'} · Edad: ${catalogAge || categorySummary}`;
 
-            const availableAgeGroups = Array.from(new Set(participant.records
-                .map(record => deriveAgeGroup(record))
-                .filter(age => age && age !== 'Sin registro')));
-
-            if (detailCategoryFilter) {
-                detailCategoryFilter.innerHTML = '<option value="">Todas las edades</option>' +
-                    availableAgeGroups.map(age => `<option value="${age}">${age}</option>`).join('');
-                detailCategoryFilter.value = '';
-            }
             if (detailDistanceFilter) {
                 detailDistanceFilter.value = '';
             }
 
             const renderDetailRecords = () => {
                 if (!selectedParticipant) return;
-                const categoryFilter = detailCategoryFilter?.value || '';
                 const distanceFilter = detailDistanceFilter?.value || '';
 
                 const filtered = selectedParticipant.records.filter(record => {
-                    const recordAge = deriveAgeGroup(record);
-                    const matchesCategory = categoryFilter ? recordAge === categoryFilter : true;
                     const normalizedDistance = normalizeDistanceLabel(record.distance);
                     const matchesDistance = distanceFilter ? normalizedDistance === distanceFilter : true;
-                    return matchesCategory && matchesDistance;
+                    return matchesDistance;
                 });
 
                 const sections = [
@@ -632,9 +623,6 @@ async function setupResultsPage() {
                 detailContent.innerHTML = renderedSections || '<p class="text-gray-400">No hay participaciones que coincidan con los filtros seleccionados.</p>';
             };
 
-            if (detailCategoryFilter) {
-                detailCategoryFilter.onchange = renderDetailRecords;
-            }
             if (detailDistanceFilter) {
                 detailDistanceFilter.onchange = renderDetailRecords;
             }
@@ -849,6 +837,7 @@ const normalizeRecordForStats = (record) => {
         eventKey: buildEventKey(eventInfo, eventName),
         timeMinutes: parseResultTimeInMinutes(record),
         year: eventInfo.year,
+        edition: parseInt(eventInfo.edition, 10) || null,
         origin,
         placement: extractPlacementValue(record)
     };
@@ -911,6 +900,7 @@ const aggregateParticipantsByEvent = (records) => {
                 key,
                 label: record.event || 'Evento no especificado',
                 year: record.year ? parseInt(record.year, 10) || 0 : 0,
+                edition: record.edition ? parseInt(record.edition, 10) || 0 : 0,
                 participants: new Set()
             });
         }
@@ -922,9 +912,11 @@ const aggregateParticipantsByEvent = (records) => {
         .map(event => ({
             label: event.label,
             year: event.year,
+            edition: event.edition,
             count: event.participants.size
         }))
         .sort((a, b) => {
+            if (a.edition !== b.edition) return a.edition - b.edition;
             if (a.year !== b.year) return a.year - b.year;
             return a.label.localeCompare(b.label);
         });
@@ -1084,38 +1076,27 @@ const getStateTileColor = (count, maxCount) => {
 };
 
 const renderStateMap = (stateParticipantMap) => {
-    const grid = document.getElementById('stateMapGrid');
+    const mapFrame = document.getElementById('stateMapEmbed');
     const list = document.getElementById('stateTopList');
-    if (!grid) return;
 
-    grid.innerHTML = '';
-    if (list) list.innerHTML = '';
-
-    const counts = stateTileLayout.map(tile => ({
-        ...tile,
-        count: stateParticipantMap.get(tile.name)?.size || 0
-    }));
-
-    const maxCount = Math.max(...counts.map(item => item.count), 0);
-
-    counts.forEach(tile => {
-        const tileElement = document.createElement('div');
-        tileElement.className = 'state-tile';
-        tileElement.style.gridColumn = tile.col;
-        tileElement.style.gridRow = tile.row;
-        tileElement.style.backgroundColor = getStateTileColor(tile.count, maxCount);
-        tileElement.style.borderColor = tile.count ? '#48bb78' : '#374151';
-        tileElement.title = `${tile.name}: ${formatNumber(tile.count)} participantes únicos`;
-        tileElement.innerHTML = `<div class="leading-tight text-center">${tile.code}<strong>${formatNumber(tile.count)}</strong></div>`;
-        grid.appendChild(tileElement);
-    });
-
-    const topStates = counts
-        .filter(item => item.count > 0)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 4);
+    if (mapFrame) {
+        mapFrame.loading = 'lazy';
+    }
 
     if (list) {
+        list.innerHTML = '';
+
+        const mapEntries = stateParticipantMap ? Array.from(stateParticipantMap.entries()) : [];
+        const counts = mapEntries.map(([name, participants]) => ({
+            name,
+            count: participants.size
+        }));
+
+        const topStates = counts
+            .filter(item => item.count > 0)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 4);
+
         if (!topStates.length) {
             list.innerHTML = '<li class="text-gray-500">Sin procedencias registradas</li>';
         } else {
@@ -1161,7 +1142,7 @@ const getTimeLimitForRecord = (record) => {
     const distance = (record?.distance || '').toUpperCase();
 
     if (distance === '1K') return 60;
-    if (distance === '5K') return 240;
+    if (distance === '5K') return 220;
 
     return null;
 };
@@ -1722,12 +1703,17 @@ const renderEventTrendChart = (data) => {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        color: '#e2e8f0',
-                        callback: value => formatNumber(value)
+                        display: false
+                    },
+                    grid: {
+                        color: '#374151'
                     }
                 },
                 x: {
-                    ticks: { color: '#e2e8f0' }
+                    ticks: {
+                        color: '#e2e8f0',
+                        font: { size: 13 }
+                    }
                 }
             }
         },
@@ -1780,7 +1766,7 @@ async function initializeChronology() {
         renderChronologyAgeChart(normalizedRecords);
         renderEventTrendChart(aggregateParticipantsByEvent(normalizedRecords));
 
-        const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.category))).filter(Boolean).sort();
+        const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.ageGroup))).filter(Boolean).sort();
         const eventOptions = events.map(event => {
             const info = parseEventInfo(event.name);
             return {
@@ -1790,8 +1776,9 @@ async function initializeChronology() {
                 edition: parseInt(info.edition, 10) || 0
             };
         }).sort((a, b) => {
-            if (a.year !== b.year) return b.year - a.year;
-            return b.edition - a.edition;
+            if (a.edition !== b.edition) return a.edition - b.edition;
+            if (a.year !== b.year) return a.year - b.year;
+            return a.label.localeCompare(b.label);
         });
 
         populateSelect('chronologyEventFilter', eventOptions, null, option => option.value, option => option.label);
@@ -1819,7 +1806,7 @@ async function initializeChronology() {
             const filtered = normalizedRecords.filter(record => {
                 const matchesEvent = !eventValue || record.eventKey === eventValue;
                 const matchesGender = !genderValue || normalizeText(record.gender) === genderValue;
-                const matchesCategory = !categoryValue || record.category === categoryValue;
+                const matchesCategory = !categoryValue || record.ageGroup === categoryValue;
                 return matchesEvent && matchesGender && matchesCategory;
             });
 
@@ -1878,6 +1865,18 @@ async function initializeHonorBoard() {
         const pageSize = 10;
         const totalSlides = Math.ceil(rankedMedalists.length / pageSize);
         let currentSlide = 0;
+        let autoSlideInterval = null;
+
+        const startAutoSlide = () => {
+            if (totalSlides <= 1) return;
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+            }
+            autoSlideInterval = setInterval(() => {
+                currentSlide = currentSlide >= totalSlides - 1 ? 0 : currentSlide + 1;
+                renderSlide();
+            }, 5000);
+        };
 
         const updateButtons = () => {
             if (prevButton) {
@@ -1936,6 +1935,7 @@ async function initializeHonorBoard() {
                 if (currentSlide > 0) {
                     currentSlide -= 1;
                     renderSlide();
+                    startAutoSlide();
                 }
             });
         }
@@ -1945,11 +1945,13 @@ async function initializeHonorBoard() {
                 if (currentSlide < totalSlides - 1) {
                     currentSlide += 1;
                     renderSlide();
+                    startAutoSlide();
                 }
             });
         }
 
         renderSlide();
+        startAutoSlide();
     } catch (error) {
         console.error('Error al construir medallero:', error);
         tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-red-500">No se pudo cargar el medallero.</td></tr>';
