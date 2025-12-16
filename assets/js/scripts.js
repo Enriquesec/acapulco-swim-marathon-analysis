@@ -684,6 +684,7 @@ function initializeEventListeners() {
     // Configurar la página de resultados si los elementos existen
     setupResultsPage();
     initializeChronology();
+    initializeHonorBoard();
 }
 
 function initializeCharts() {
@@ -800,6 +801,31 @@ const parseResultTimeInMinutes = (record) => {
     return null;
 };
 
+const extractPlacementValue = (record = {}) => {
+    const candidateFields = [
+        'position_category',
+        'positionCategory',
+        'lugar_categoria',
+        'lugar_categoría',
+        'lugar_rama',
+        'lugar_general',
+        'posicion',
+        'posición'
+    ];
+
+    for (const field of candidateFields) {
+        if (record[field] === undefined || record[field] === null) continue;
+
+        const numericPart = record[field].toString().match(/\d+/);
+        if (!numericPart) continue;
+
+        const value = parseInt(numericPart[0], 10);
+        if (!Number.isNaN(value)) return value;
+    }
+
+    return null;
+};
+
 const normalizeRecordForStats = (record) => {
     const distanceLabel = normalizeDistanceLabel(record.distance || record.distancia || record['distancia (km)']);
     if (!distanceLabel) return null;
@@ -823,7 +849,8 @@ const normalizeRecordForStats = (record) => {
         eventKey: buildEventKey(eventInfo, eventName),
         timeMinutes: parseResultTimeInMinutes(record),
         year: eventInfo.year,
-        origin
+        origin,
+        placement: extractPlacementValue(record)
     };
 };
 
@@ -901,6 +928,54 @@ const aggregateParticipantsByEvent = (records) => {
             if (a.year !== b.year) return a.year - b.year;
             return a.label.localeCompare(b.label);
         });
+};
+
+const rankMedalists = (records) => {
+    const medalMap = new Map();
+
+    records.forEach(record => {
+        if (!record || !record.placement || record.placement < 1 || record.placement > 6) return;
+
+        const key = record.participantKey;
+        if (!key) return;
+
+        if (!medalMap.has(key)) {
+            medalMap.set(key, {
+                key,
+                name: record.name || 'Participante no identificado',
+                origin: record.origin || 'Procedencia no registrada',
+                medals: [0, 0, 0, 0, 0, 0],
+                total: 0
+            });
+        }
+
+        const entry = medalMap.get(key);
+        const placementIndex = record.placement - 1;
+
+        entry.medals[placementIndex] += 1;
+        entry.total += 1;
+
+        if ((!entry.origin || entry.origin === 'Procedencia no registrada') && record.origin) {
+            entry.origin = record.origin;
+        }
+        if ((!entry.name || entry.name === 'Participante no identificado') && record.name) {
+            entry.name = record.name;
+        }
+    });
+
+    return Array.from(medalMap.values()).sort((a, b) => {
+        for (let i = 0; i < 6; i += 1) {
+            if (a.medals[i] !== b.medals[i]) {
+                return b.medals[i] - a.medals[i];
+            }
+        }
+
+        if (a.total !== b.total) {
+            return b.total - a.total;
+        }
+
+        return a.name.localeCompare(b.name);
+    });
 };
 
 const stateKeywords = [
@@ -1772,5 +1847,57 @@ async function initializeChronology() {
     } catch (error) {
         console.error('Error al inicializar cronología:', error);
         summaryElement.insertAdjacentElement('beforebegin', createEmptyState('No se pudieron cargar los datos de cronología.'));
+    }
+}
+
+async function initializeHonorBoard() {
+    const tableBody = document.getElementById('honorBoardBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-gray-400">Calculando medallero...</td></tr>';
+
+    try {
+        const rawResults = await fetchJson('./assets/data/history_results.json');
+        const normalizedRecords = rawResults.map(normalizeRecordForStats).filter(Boolean);
+        const rankedMedalists = rankMedalists(normalizedRecords);
+
+        if (!rankedMedalists.length) {
+            tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-gray-400">Aún no hay medallas registradas.</td></tr>';
+            return;
+        }
+
+        const totalMedals = rankedMedalists.reduce((sum, athlete) => sum + athlete.total, 0);
+        const topGold = rankedMedalists[0];
+
+        setTextContent('honorBoardAthletes', formatNumber(rankedMedalists.length));
+        setTextContent('honorBoardTotalMedals', formatNumber(totalMedals));
+        setTextContent('honorBoardTopGold', `${topGold.name} · ${formatNumber(topGold.medals[0])} oros`);
+
+        const rows = rankedMedalists.slice(0, 100).map((athlete, index) => {
+            const [gold, silver, bronze, fourth, fifth, sixth] = athlete.medals;
+            const highlight = index < 3 ? 'bg-gray-900/40' : '';
+
+            return `
+                <tr class="border-b border-gray-800 ${highlight}">
+                    <td class="py-3 px-2 text-sm text-gray-400">${index + 1}</td>
+                    <td class="py-3 px-2">
+                        <div class="font-semibold text-white">${athlete.name}</div>
+                        <p class="text-xs text-gray-400">${athlete.origin || 'Procedencia no registrada'}</p>
+                    </td>
+                    <td class="py-3 px-2 text-center text-yellow-300 font-semibold">${formatNumber(gold)}</td>
+                    <td class="py-3 px-2 text-center text-gray-200">${formatNumber(silver)}</td>
+                    <td class="py-3 px-2 text-center text-orange-300">${formatNumber(bronze)}</td>
+                    <td class="py-3 px-2 text-center">${formatNumber(fourth)}</td>
+                    <td class="py-3 px-2 text-center">${formatNumber(fifth)}</td>
+                    <td class="py-3 px-2 text-center">${formatNumber(sixth)}</td>
+                    <td class="py-3 px-2 text-center font-semibold text-green-400">${formatNumber(athlete.total)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        tableBody.innerHTML = rows;
+    } catch (error) {
+        console.error('Error al construir medallero:', error);
+        tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-red-500">No se pudo cargar el medallero.</td></tr>';
     }
 }
