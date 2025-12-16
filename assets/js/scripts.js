@@ -119,30 +119,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('nav a[data-target]'); // Selecciona todos los enlaces del nav
     const navContainer = document.getElementById('navbar-container');
     const contentDiv = document.getElementById('content'); // Contenedor donde se cargará el contenido
-    
-    const loadContent = async (targetFile) => {
-        try {
-            // Usa fetch para cargar el archivo HTML
-            const response = await fetch(`./${targetFile}`);
-            if (response.ok) {
-                const content = await response.text(); // Convierte la respuesta a texto
-                contentDiv.innerHTML = content; // Inserta el contenido en el div
-                initializeCharts(); // Llama a una función para inicializar los gráficos
-                initializeEventListeners(); // Llama a una función para los nuevos listeners
-                initializeSwiper(); // Llama a una función para inicializar el carrusel
+    const contentCache = new Map();
 
-                // Actualizar el estado activo de los enlaces
-                links.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('data-target') === targetFile) {
-                        link.classList.add('active');
-                    }
-                });
-            } else {
-                contentDiv.innerHTML = `<p>Error ${response.status}: No se pudo cargar el contenido.</p>`;
+    const setActiveLink = (targetFile) => {
+        links.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-target') === targetFile) {
+                link.classList.add('active');
             }
+        });
+    };
+
+    const mountContent = (targetFile, content) => {
+        contentDiv.innerHTML = content; // Inserta el contenido en el div
+        initializeCharts(); // Llama a una función para inicializar los gráficos
+        initializeEventListeners(); // Llama a una función para los nuevos listeners
+        initializeSwiper(); // Llama a una función para inicializar el carrusel
+        setActiveLink(targetFile);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const loadContent = async (targetFile) => {
+        if (!targetFile) return;
+
+        try {
+            contentDiv.setAttribute('aria-busy', 'true');
+            contentDiv.innerHTML = '<p class="text-center text-gray-400 py-6">Cargando sección...</p>';
+
+            if (contentCache.has(targetFile)) {
+                mountContent(targetFile, contentCache.get(targetFile));
+                return;
+            }
+
+            const response = await fetch(`./${targetFile}`);
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: No se pudo cargar el contenido.`);
+            }
+
+            const content = await response.text(); // Convierte la respuesta a texto
+            contentCache.set(targetFile, content);
+            mountContent(targetFile, content);
         } catch (error) {
-            contentDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            console.error(error);
+            contentDiv.innerHTML = `<p class="text-center text-red-400 py-6">${error.message}</p>`;
+        } finally {
+            contentDiv.removeAttribute('aria-busy');
         }
     };
 
@@ -654,21 +675,6 @@ async function setupResultsPage() {
 }
 
 function initializeEventListeners() {
-    const applyFiltersButton = document.getElementById('applyFilters');
-    if (applyFiltersButton) {
-        applyFiltersButton.addEventListener('click', () => {
-            const edition = document.getElementById('edition').value;
-            const gender = document.getElementById('gender').value;
-            const category = document.getElementById('category').value;
-        
-            console.log('Edición seleccionada:', edition);
-            console.log('Sexo seleccionado:', gender);
-            console.log('Categoría seleccionada:', category);
-        
-            // Aquí puedes filtrar los datos según los valores seleccionados
-        });
-    }
-
     // Configurar la página de resultados si los elementos existen
     setupResultsPage();
     initializeChronology();
