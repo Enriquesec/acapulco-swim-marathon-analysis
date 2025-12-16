@@ -13,7 +13,7 @@ const extractYearFromEvent = (eventString = '') => {
 };
 
 const parseEventInfo = (eventString = '') => {
-    const eventPattern = /id=(\d+)_([\d]+)_mara[tó]n_acapulco_(\d{4})/i;
+    const eventPattern = /id=(\d+)_([\d]+)_marat[oó]n_acapulco_(\d{4})/i;
     const match = eventString.match(eventPattern);
 
     if (match) {
@@ -85,6 +85,28 @@ let oneKAgeChartInstance = null;
 let oneKTimeChartInstance = null;
 let yearTrendChartInstance = null;
 let chronologyTimeChartInstances = {};
+
+const pointValueLabelPlugin = {
+    id: 'pointValueLabel',
+    afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        ctx.save();
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            meta.data.forEach((element, index) => {
+                const value = dataset.data[index];
+                if (value === null || value === undefined) return;
+
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(value, element.x, element.y - 6);
+            });
+        });
+        ctx.restore();
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('nav a[data-target]'); // Selecciona todos los enlaces del nav
@@ -706,8 +728,11 @@ const fetchJson = async (path) => {
 const normalizeDistanceLabel = (value = '') => {
     const cleaned = value.toString().trim().toUpperCase();
     if (!cleaned) return '';
-    if (cleaned.includes('1')) return '1K';
-    if (cleaned.includes('5')) return '5K';
+
+    const numericValue = cleaned.replace(/[^0-9]/g, '');
+    if (numericValue === '1') return '1K';
+    if (numericValue === '5') return '5K';
+
     return cleaned;
 };
 
@@ -1442,7 +1467,9 @@ const renderEventTrendChart = (data) => {
                 borderColor: '#48bb78',
                 backgroundColor: 'rgba(72, 187, 120, 0.2)',
                 tension: 0.3,
-                fill: true
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
@@ -1462,7 +1489,8 @@ const renderEventTrendChart = (data) => {
                     ticks: { color: '#e2e8f0' }
                 }
             }
-        }
+        },
+        plugins: [pointValueLabelPlugin]
     });
 };
 
@@ -1529,8 +1557,10 @@ async function initializeChronology() {
         const timeStatus1k = document.getElementById('chronologyTimeStatus1k');
         const timeStatus5k = document.getElementById('chronologyTimeStatus5k');
 
-        if (eventSelect && eventOptions.length) {
-            eventSelect.value = eventOptions[0].value;
+        const preferredEvent = eventOptions.find(option => option.edition === 66 && option.year === 2025) || eventOptions[0];
+
+        if (eventSelect && preferredEvent) {
+            eventSelect.value = preferredEvent.value;
         }
 
         const applyFilters = () => {
