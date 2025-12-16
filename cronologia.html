@@ -1,37 +1,68 @@
-<div class="container mx-auto space-y-6">
-    <header class="flex items-start justify-between flex-wrap gap-3">
-        <div class="space-y-2">
-            <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Cronología</p>
-            <h2 class="text-3xl font-bold text-white">Explora la evolución del maratón</h2>
-            <p class="text-sm text-gray-400 max-w-3xl">Consulta los picos de participación, filtra los datos por evento y descubre cómo se comportan los atletas por distancia, género y edad.</p>
-        </div>
+<div class="container mx-auto space-y-8">
+    <section class="text-center pt-10">
+        <h1 class="text-5xl md:text-7xl font-bold">Maratón Internacional Acapulco</h1>
+    </section>
+
+    <header class="space-y-2 text-center">
+        <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Cronología</p>
+        <h2 class="text-3xl font-bold text-white">Explora la evolución del maratón</h2>
+        <p class="text-sm text-gray-400 max-w-3xl mx-auto">Consulta los picos de participación, filtra los datos por evento y descubre cómo se comportan los atletas por distancia, género y edad.</p>
     </header>
 
-    <section aria-label="Resumen general" class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Eventos registrados</p>
-                <p id="summary-events" class="text-3xl font-bold text-green-500 mt-1">—</p>
+    <section aria-label="Resumen general" class="space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
+            <div class="space-y-4 xl:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-5 rounded-xl border border-gray-700 shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-300">Eventos registrados</p>
+                            <p id="summary-events" class="text-4xl font-extrabold text-green-400 mt-1">—</p>
+                        </div>
+                        <div class="text-green-400 text-3xl" aria-hidden="true">◆</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-500 p-5 rounded-xl shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-900">Participantes únicos</p>
+                            <p id="summary-participants" class="text-4xl font-extrabold text-gray-900 mt-1">—</p>
+                        </div>
+                        <div class="text-gray-900 text-3xl" aria-hidden="true">★</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Participantes en 1K</p>
+                            <p id="summary-1k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">Ruta corta</span>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400">Participantes en 5K</p>
+                            <p id="summary-5k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">Ruta larga</span>
+                    </div>
+                </div>
             </div>
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Participantes únicos</p>
-                <p id="summary-participants" class="text-3xl font-bold text-green-500 mt-1">—</p>
-            </div>
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Mujeres</p>
-                <p id="summary-female" class="text-3xl font-bold text-green-500 mt-1">—</p>
-            </div>
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Hombres</p>
-                <p id="summary-male" class="text-3xl font-bold text-green-500 mt-1">—</p>
-            </div>
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Participantes en 1K</p>
-                <p id="summary-1k" class="text-3xl font-bold text-green-500 mt-1">—</p>
-            </div>
-            <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md">
-                <p class="text-sm text-gray-400">Participantes en 5K</p>
-                <p id="summary-5k" class="text-3xl font-bold text-green-500 mt-1">—</p>
+            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-md flex flex-col gap-4 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución por sexo</h3>
+                    <span class="text-xs text-gray-400">Participantes únicos</span>
+                </div>
+                <div class="chart-wrapper h-52">
+                    <canvas id="genderSummaryChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                    <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
+                        <span>Mujeres</span>
+                        <span id="summary-female" class="font-bold text-green-400">—</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
+                        <span>Hombres</span>
+                        <span id="summary-male" class="font-bold text-green-400">—</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -105,24 +136,18 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                        <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 1K</h3>
-                        <p class="text-sm text-gray-400">Histograma por sexo para la distancia de 1K.</p>
-                    </div>
-                    <p id="chronologyTimeStatus1k" class="text-sm text-gray-400 hidden">—</p>
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 1K</h3>
+                    <p id="chronologyTimeStatus1k" class="text-sm text-gray-400 hidden mt-1">—</p>
                 </div>
                 <div class="chart-wrapper mt-4">
                     <canvas id="chronologyTimeChart1k" class="chart-canvas"></canvas>
                 </div>
             </div>
             <div class="card bg-gray-800 text-white p-6 rounded-lg shadow-md">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                        <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 5K</h3>
-                        <p class="text-sm text-gray-400">Histograma por sexo para la distancia de 5K.</p>
-                    </div>
-                    <p id="chronologyTimeStatus5k" class="text-sm text-gray-400 hidden">—</p>
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución de tiempos 5K</h3>
+                    <p id="chronologyTimeStatus5k" class="text-sm text-gray-400 hidden mt-1">—</p>
                 </div>
                 <div class="chart-wrapper mt-4">
                     <canvas id="chronologyTimeChart5k" class="chart-canvas"></canvas>

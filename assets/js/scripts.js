@@ -967,10 +967,8 @@ const getTimesByGenderWithinLimits = (records) => {
 
     records.forEach(record => {
         const time = record?.timeMinutes;
-        const limit = getTimeLimitForRecord(record);
 
         if (typeof time !== 'number' || Number.isNaN(time)) return;
-        if (limit && time > limit) return;
 
         grouped.overall.push(time);
 
@@ -1233,11 +1231,11 @@ const renderDistanceParticipantsChart = (data) => {
     });
 };
 
-const renderGenderSummaryChart = (distribution, canvasId, chartInstanceRef) => {
+const renderGenderSummaryChart = (distribution, canvasId = 'genderSummaryChart') => {
     const canvas = document.getElementById(canvasId);
-    if (chartInstanceRef) {
-        chartInstanceRef.destroy();
-        chartInstanceRef = null;
+    if (genderSummaryChartInstance) {
+        genderSummaryChartInstance.destroy();
+        genderSummaryChartInstance = null;
     }
     if (!canvas) return null;
 
@@ -1247,7 +1245,7 @@ const renderGenderSummaryChart = (distribution, canvasId, chartInstanceRef) => {
 
     const palette = ['#63b3ed', '#ed64a6', '#f6ad55', '#b794f4'];
 
-    return new Chart(canvas.getContext('2d'), {
+    genderSummaryChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels,
@@ -1269,6 +1267,8 @@ const renderGenderSummaryChart = (distribution, canvasId, chartInstanceRef) => {
             }
         }
     });
+
+    return genderSummaryChartInstance;
 };
 
 const renderOneKAgeChart = (distribution) => {
@@ -1523,6 +1523,11 @@ async function initializeChronology() {
         setTextContent('summary-participants', totalUniqueParticipants || '0');
         setTextContent('summary-female', genderSummary.femaleCount || '0');
         setTextContent('summary-male', genderSummary.maleCount || '0');
+
+        renderGenderSummaryChart({
+            Mujeres: genderSummary.femaleCount,
+            Hombres: genderSummary.maleCount
+        });
 
         const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
         const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
