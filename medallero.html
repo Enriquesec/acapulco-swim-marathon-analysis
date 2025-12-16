@@ -1,0 +1,60 @@
+<div class="container mx-auto space-y-6 py-6">
+    <section class="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl border border-gray-700 shadow-lg">
+        <p class="text-xs font-semibold uppercase tracking-wide text-yellow-400">Cuadro de honor</p>
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mt-1">
+            <h1 class="text-3xl md:text-4xl font-bold">Medallero histórico</h1>
+            <p class="text-sm text-gray-300 max-w-2xl">
+                Mostramos a las y los participantes con más podios históricos. Las posiciones del 1° al 6° cuentan como medallas,
+                con prioridad absoluta para el oro, luego plata, bronce y así sucesivamente.
+            </p>
+        </div>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-3">
+        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-lg space-y-1">
+            <p class="text-xs uppercase text-gray-400">Participantes con medallas</p>
+            <p id="honorBoardAthletes" class="text-3xl font-extrabold text-green-400">—</p>
+            <p class="text-sm text-gray-400">Personas que han terminado en los primeros 6 lugares.</p>
+        </div>
+        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-lg space-y-1">
+            <p class="text-xs uppercase text-gray-400">Medallas contabilizadas</p>
+            <p id="honorBoardTotalMedals" class="text-3xl font-extrabold text-yellow-400">—</p>
+            <p class="text-sm text-gray-400">Suma de todos los podios (1° a 6° lugares).</p>
+        </div>
+        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-lg space-y-1">
+            <p class="text-xs uppercase text-gray-400">Líder en oro</p>
+            <p id="honorBoardTopGold" class="text-2xl font-bold text-white">—</p>
+            <p class="text-sm text-gray-400">Se priorizan los oros sobre cualquier otra medalla.</p>
+        </div>
+    </section>
+
+    <section class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <p class="text-xs uppercase tracking-wide text-gray-400">Ordenado por peso de medallas</p>
+                <h2 class="text-2xl font-semibold text-green-400">Top históricamente más laureados</h2>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-gray-700 text-xs text-gray-200">Oro > Plata > Bronce > 4° > 5° > 6°</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-gray-300">
+                <thead class="text-xs uppercase text-gray-400">
+                    <tr class="border-b border-gray-700">
+                        <th class="py-3 px-2 text-left">#</th>
+                        <th class="py-3 px-2 text-left">Participante</th>
+                        <th class="py-3 px-2 text-center">Oro</th>
+                        <th class="py-3 px-2 text-center">Plata</th>
+                        <th class="py-3 px-2 text-center">Bronce</th>
+                        <th class="py-3 px-2 text-center">4°</th>
+                        <th class="py-3 px-2 text-center">5°</th>
+                        <th class="py-3 px-2 text-center">6°</th>
+                        <th class="py-3 px-2 text-center">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="honorBoardBody"></tbody>
+            </table>
+        </div>
+        <p class="text-xs text-gray-500">*En caso de empate se ordena por quien tenga más oros, luego platas, bronces y así sucesivamente.</p>
+    </section>
+</div>
