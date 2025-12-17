@@ -1822,8 +1822,6 @@ async function initializeChronology() {
             Hombres: genderSummary.maleCount
         });
 
-        renderStateMap(aggregateParticipantsByState(normalizedRecords));
-
         const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
         const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
         setTextContent('summary-1k', oneKParticipants || '0');
@@ -1854,7 +1852,6 @@ async function initializeChronology() {
         const eventSelect = document.getElementById('chronologyEventFilter');
         const genderSelect = document.getElementById('chronologyGenderFilter');
         const categorySelect = document.getElementById('chronologyCategoryFilter');
-        const applyButton = document.getElementById('applyChronologyFilters');
         const timeStatus = document.getElementById('chronologyTimeStatus');
         const distanceToggleButtons = document.querySelectorAll('[data-distance-toggle]');
         const genderToggleButtons = document.querySelectorAll('[data-gender-toggle]');
@@ -1951,10 +1948,6 @@ async function initializeChronology() {
                 select.addEventListener('change', applyFilters);
             }
         });
-
-        if (applyButton) {
-            applyButton.addEventListener('click', applyFilters);
-        }
 
         applyFilters();
     } catch (error) {
