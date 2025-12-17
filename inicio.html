@@ -1,158 +1,146 @@
 <div class="container mx-auto space-y-6">
-    <section class="grid gap-4 xl:grid-cols-12 items-start pt-6">
-        <div class="xl:col-span-8 space-y-4">
-            <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl border border-gray-700 shadow-lg">
-                <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Dashboard</p>
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mt-1">
-                    <h1 class="text-4xl md:text-5xl font-bold">Maratón Internacional Acapulco</h1>
-                    <p class="text-sm text-gray-300 max-w-xl">Un vistazo rápido al desempeño histórico del maratón: participantes, tendencias, tiempos y procedencia.</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-                    <div class="lg:col-span-1 bg-gray-900/40 border border-gray-700/60 rounded-lg p-4 space-y-2">
-                        <p class="text-sm text-gray-200 font-semibold">Evolución de participación</p>
-                        <p class="text-xs text-gray-300 leading-relaxed">Comparativa histórica de participantes únicos por evento para seguir el crecimiento del maratón.</p>
+    <section class="grid gap-6 xl:grid-cols-12 items-start pt-6">
+        <div class="xl:col-span-8 space-y-6">
+            <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl border border-gray-700/70 shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-green-400">Dashboard</p>
+                        <h1 class="text-4xl md:text-5xl font-bold">Maratón Internacional Acapulco</h1>
+                        <p class="text-sm text-gray-200">Datos históricos en un vistazo.</p>
                     </div>
-                    <div class="lg:col-span-2 bg-gray-900/40 border border-gray-700/60 rounded-lg p-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-green-400">Participantes por evento</h3>
-                            <span class="text-xs text-gray-300">Edición a edición</span>
-                        </div>
-                        <div class="chart-wrapper mt-2 h-60">
-                            <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
-                        </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">Eventos</p>
+                        <p id="summary-events" class="text-3xl font-extrabold text-green-400 mt-1">—</p>
+                    </div>
+                    <div class="bg-green-600 p-4 rounded-lg text-gray-900">
+                        <p class="text-xs text-gray-900/80 uppercase">Participantes únicos</p>
+                        <p id="summary-participants" class="text-3xl font-extrabold mt-1">—</p>
+                    </div>
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">1K</p>
+                        <p id="summary-1k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                    </div>
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">5K</p>
+                        <p id="summary-5k" class="text-3xl font-bold text-green-400 mt-1">—</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
-                    <p class="text-xs text-gray-400 uppercase">Eventos registrados</p>
-                    <p id="summary-events" class="text-3xl font-extrabold text-green-400 mt-1">—</p>
+            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="text-lg font-semibold text-green-400">Tendencia de participación</h3>
+                    <span class="text-xs text-gray-400">Participantes por evento</span>
                 </div>
-                <div class="bg-green-600 p-4 rounded-lg shadow-lg text-gray-900">
-                    <p class="text-xs text-gray-900/80 uppercase">Participantes únicos</p>
-                    <p id="summary-participants" class="text-3xl font-extrabold mt-1">—</p>
-                </div>
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
-                    <p class="text-xs text-gray-400 uppercase">Participantes en 1K</p>
-                    <p id="summary-1k" class="text-3xl font-bold text-green-400 mt-1">—</p>
-                </div>
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
-                    <p class="text-xs text-gray-400 uppercase">Participantes en 5K</p>
-                    <p id="summary-5k" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                <div class="chart-wrapper mt-3 h-60">
+                    <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700 lg:col-span-2">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
-                        <span class="text-xs text-gray-400">General</span>
-                    </div>
-                    <div class="chart-wrapper mt-2 h-64">
-                        <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
-                    </div>
+            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
+                    <span class="text-xs text-gray-400">General</span>
                 </div>
-                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-md flex flex-col gap-3 border border-gray-700">
+                <div class="chart-wrapper mt-2 h-64">
+                    <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-green-400">Distribución por sexo</h3>
                         <span class="text-xs text-gray-400">Participantes únicos</span>
                     </div>
-                    <div class="chart-wrapper h-48">
+                    <div class="chart-wrapper h-52 mt-2">
                         <canvas id="genderSummaryChart" class="chart-canvas"></canvas>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                        <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
-                            <span>Mujeres</span>
-                            <span id="summary-female" class="font-bold text-green-400">—</span>
-                        </div>
-                        <div class="flex items-center justify-between bg-gray-900 rounded-md px-3 py-2">
-                            <span>Hombres</span>
-                            <span id="summary-male" class="font-bold text-green-400">—</span>
-                        </div>
-                    </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1">
-                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-md border border-gray-700 flex flex-col gap-4">
+                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70 flex flex-col gap-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-green-400">Mapa de procedencias</h3>
                         <span class="text-xs text-gray-400">Participantes únicos</span>
                     </div>
-                    <div class="state-map-wrapper">
-                        <div id="stateMapGrid" class="state-grid"></div>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase text-gray-400">Estados con más presencia</p>
-                        <ul id="stateTopList" class="text-sm text-gray-200 mt-1 space-y-1"></ul>
+                    <div class="flex flex-col lg:flex-row gap-4">
+                        <div class="state-map-wrapper flex-1">
+                            <div id="stateMapGrid" class="state-grid"></div>
+                        </div>
+                        <div class="lg:w-1/3 bg-gray-900/60 border border-gray-700/60 rounded-lg p-4 space-y-2">
+                            <p class="text-xs uppercase text-gray-400">Top 5 estados</p>
+                            <ul id="stateTopList" class="text-sm text-gray-200 space-y-1"></ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="xl:col-span-4 space-y-4">
-            <section aria-label="Filtros de cronología" class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700 space-y-4">
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <h3 class="text-lg font-semibold text-green-400">Filtrar resultados</h3>
-                    <button id="applyChronologyFilters" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm">Aplicar</button>
+        <aside class="xl:col-span-4 space-y-4 xl:sticky xl:top-6">
+            <details open class="bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-700/70">
+                <summary class="text-lg font-semibold text-green-400 cursor-pointer">Filtros</summary>
+                <div class="mt-4 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label for="chronologyEventFilter" class="block text-sm font-medium text-white mb-1">Evento</label>
+                            <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
+                        </div>
+                        <div>
+                            <label for="chronologyGenderFilter" class="block text-sm font-medium text-white mb-1">Sexo</label>
+                            <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Categoría de edad</label>
+                            <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 flex-wrap text-xs text-gray-300" id="activeFiltersSummary"></div>
+                    <div class="flex justify-end">
+                        <button id="applyChronologyFilters" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm">Aplicar filtros</button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label for="chronologyEventFilter" class="block text-sm font-medium text-white mb-1">Evento</label>
-                        <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
-                    </div>
-                    <div>
-                        <label for="chronologyGenderFilter" class="block text-sm font-medium text-white mb-1">Sexo</label>
-                        <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="">Todos</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="chronologyCategoryFilter" class="block text-sm font-medium text-white mb-1">Categoría de edad</label>
-                        <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                </div>
-            </section>
+            </details>
 
-            <section aria-label="Resultados filtrados" class="space-y-3">
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700">
-                        <p class="text-xs text-gray-400 uppercase">Participantes filtrados</p>
+            <section aria-label="Resultados filtrados" class="bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-700/70 space-y-4">
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-gray-900/60 rounded-lg p-4 border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">Participantes</p>
                         <p id="filtered-participants" class="text-2xl font-bold text-green-500 mt-1">—</p>
                     </div>
-                    <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700">
+                    <div class="bg-gray-900/60 rounded-lg p-4 border border-gray-700/60">
                         <p class="text-xs text-gray-400 uppercase">Mujeres</p>
                         <p id="filtered-female" class="text-2xl font-bold text-green-500 mt-1">—</p>
                     </div>
-                    <div class="card bg-gray-800 text-white p-4 rounded-lg shadow-md border border-gray-700">
+                    <div class="bg-gray-900/60 rounded-lg p-4 border border-gray-700/60">
                         <p class="text-xs text-gray-400 uppercase">Hombres</p>
                         <p id="filtered-male" class="text-2xl font-bold text-green-500 mt-1">—</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="card bg-gray-800 text-white p-5 rounded-lg shadow-md border border-gray-700">
-                        <div class="text-center">
-                            <h3 class="text-lg font-semibold text-green-400">1K</h3>
-                            <p id="chronologyTimeStatus1k" class="text-sm text-gray-400 hidden mt-1">—</p>
+
+                <div class="bg-gray-900/60 rounded-lg border border-gray-700/60 p-4 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex gap-2" role="group" aria-label="Seleccionar distancia">
+                            <button type="button" data-distance-toggle="1K" class="filter-toggle active">1K</button>
+                            <button type="button" data-distance-toggle="5K" class="filter-toggle">5K</button>
                         </div>
-                        <div class="chart-wrapper mt-3 h-52">
-                            <canvas id="chronologyTimeChart1k" class="chart-canvas"></canvas>
+                        <div class="flex gap-2" role="group" aria-label="Seleccionar género">
+                            <button type="button" data-gender-toggle="combined" class="filter-toggle active">Combinado</button>
+                            <button type="button" data-gender-toggle="female" class="filter-toggle">Mujeres</button>
+                            <button type="button" data-gender-toggle="male" class="filter-toggle">Hombres</button>
                         </div>
                     </div>
-                    <div class="card bg-gray-800 text-white p-5 rounded-lg shadow-md border border-gray-700">
-                        <div class="text-center">
-                            <h3 class="text-lg font-semibold text-green-400">5K</h3>
-                            <p id="chronologyTimeStatus5k" class="text-sm text-gray-400 hidden mt-1">—</p>
-                        </div>
-                        <div class="chart-wrapper mt-3 h-52">
-                            <canvas id="chronologyTimeChart5k" class="chart-canvas"></canvas>
-                        </div>
+                    <p id="chronologyTimeStatus" class="text-sm text-gray-400 hidden">—</p>
+                    <div class="chart-wrapper h-52">
+                        <canvas id="chronologyTimeChart" class="chart-canvas"></canvas>
                     </div>
                 </div>
             </section>
-        </div>
+        </aside>
     </section>
 </div>

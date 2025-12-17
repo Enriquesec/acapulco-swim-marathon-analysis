@@ -197,6 +197,8 @@ footer {
     color: #e2e8f0;
     background: #1f2937;
     border: 1px solid #374151;
+    position: relative;
+    overflow: hidden;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
@@ -215,6 +217,60 @@ footer {
     font-size: 10px;
     font-weight: 600;
     color: #cbd5e0;
+}
+
+.state-tile::after {
+    content: attr(data-state-name);
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.85);
+    color: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+}
+
+.state-tile:hover::after,
+.state-tile:focus-visible::after {
+    opacity: 1;
+}
+
+.filter-toggle {
+    padding: 0.45rem 0.8rem;
+    border-radius: 9999px;
+    background: #1f2937;
+    color: #e2e8f0;
+    border: 1px solid #374151;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.filter-toggle:hover {
+    border-color: #48bb78;
+}
+
+.filter-toggle.active {
+    background: #48bb78;
+    color: #0f172a;
+    border-color: #34d399;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 9999px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #e2e8f0;
 }
 
 /* Estilos para el carrusel de eventos */

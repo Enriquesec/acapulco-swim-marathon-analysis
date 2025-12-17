@@ -90,7 +90,7 @@ let oneKGenderChartInstance = null;
 let oneKAgeChartInstance = null;
 let oneKTimeChartInstance = null;
 let yearTrendChartInstance = null;
-let chronologyTimeChartInstances = {};
+let chronologyTimeChartInstance = null;
 
 const pointValueLabelPlugin = {
     id: 'pointValueLabel',
@@ -1102,6 +1102,9 @@ const renderStateMap = (stateParticipantMap) => {
             tileElement.style.gridColumn = tile.col;
             tileElement.style.background = getStateTileColor(count, maxCount);
             tileElement.title = `${tile.name}: ${formatNumber(count)} participantes`;
+            tileElement.setAttribute('tabindex', '0');
+            tileElement.setAttribute('data-state-name', tile.name);
+            tileElement.setAttribute('aria-label', `${tile.name}: ${formatNumber(count)} participantes`);
             tileElement.innerHTML = `<span>${tile.code}</span><strong>${formatNumber(count)}</strong>`;
 
             grid.appendChild(tileElement);
@@ -1120,7 +1123,7 @@ const renderStateMap = (stateParticipantMap) => {
         const topStates = counts
             .filter(item => item.count > 0)
             .sort((a, b) => b.count - a.count)
-            .slice(0, 4);
+            .slice(0, 5);
 
         if (!topStates.length) {
             list.innerHTML = '<li class="text-gray-500">Sin procedencias registradas</li>';
@@ -1621,9 +1624,8 @@ const renderOneKTimeChart = (records, statusElement) => {
     });
 };
 
-const renderChronologyTimeChartForDistance = (records, distanceLabel, statusElement) => {
-    const canvasId = `chronologyTimeChart${distanceLabel.toLowerCase()}`;
-    const canvas = document.getElementById(canvasId);
+const renderChronologyTimeChartForDistance = (records, distanceLabel, statusElement, genderView = 'combined') => {
+    const canvas = document.getElementById('chronologyTimeChart');
     if (!canvas) return;
 
     const distanceKey = distanceLabel.toUpperCase();
@@ -1632,14 +1634,21 @@ const renderChronologyTimeChartForDistance = (records, distanceLabel, statusElem
     const timesByGender = getTimesByGenderWithinLimits(filteredRecords, timeLimit);
     const combinedTimes = [...timesByGender.female, ...timesByGender.male];
 
-    if (chronologyTimeChartInstances[distanceKey]) {
-        chronologyTimeChartInstances[distanceKey].destroy();
-        chronologyTimeChartInstances[distanceKey] = null;
-    }
+    const targetTimes = genderView === 'female'
+        ? timesByGender.female
+        : genderView === 'male'
+            ? timesByGender.male
+            : combinedTimes;
 
-    if (!combinedTimes.length) {
+    if (!targetTimes.length) {
+        if (chronologyTimeChartInstance) {
+            chronologyTimeChartInstance.destroy();
+            chronologyTimeChartInstance = null;
+        }
+
         if (statusElement) {
-            statusElement.textContent = `Sin tiempos registrados para ${distanceLabel}.`;
+            const genderLabel = genderView === 'combined' ? 'combinado' : genderView;
+            statusElement.textContent = `Sin tiempos para ${distanceLabel} (${genderLabel}).`;
             statusElement.classList.remove('hidden');
         }
         return;
@@ -1650,26 +1659,56 @@ const renderChronologyTimeChartForDistance = (records, distanceLabel, statusElem
         statusElement.classList.add('hidden');
     }
 
-    const histogram = buildTimeHistogram(combinedTimes, 5);
-    const femaleHistogram = buildTimeHistogram(timesByGender.female, 5, histogram.range);
-    const maleHistogram = buildTimeHistogram(timesByGender.male, 5, histogram.range);
+    const baseHistogram = buildTimeHistogram(combinedTimes.length ? combinedTimes : targetTimes, 5);
+    const rangeReference = baseHistogram.range;
+    let chartLabels = baseHistogram.labels;
+    let datasets = [];
 
-    chronologyTimeChartInstances[distanceKey] = new Chart(canvas.getContext('2d'), {
+    if (genderView === 'combined') {
+        const femaleHistogram = buildTimeHistogram(timesByGender.female, 5, rangeReference);
+        const maleHistogram = buildTimeHistogram(timesByGender.male, 5, rangeReference);
+        chartLabels = chartLabels.length ? chartLabels : femaleHistogram.labels;
+
+        datasets = [
+            {
+                label: 'Mujeres',
+                data: femaleHistogram.labels.length ? femaleHistogram.counts : new Array(chartLabels.length).fill(0),
+                backgroundColor: 'rgba(72, 187, 120, 0.7)'
+            },
+            {
+                label: 'Hombres',
+                data: maleHistogram.labels.length ? maleHistogram.counts : new Array(chartLabels.length).fill(0),
+                backgroundColor: 'rgba(248, 180, 0, 0.7)'
+            }
+        ];
+    } else if (genderView === 'female') {
+        const femaleHistogram = buildTimeHistogram(timesByGender.female, 5, rangeReference);
+        chartLabels = femaleHistogram.labels.length ? femaleHistogram.labels : chartLabels;
+        datasets = [{
+            label: 'Mujeres',
+            data: femaleHistogram.counts,
+            backgroundColor: 'rgba(72, 187, 120, 0.7)'
+        }];
+    } else {
+        const maleHistogram = buildTimeHistogram(timesByGender.male, 5, rangeReference);
+        chartLabels = maleHistogram.labels.length ? maleHistogram.labels : chartLabels;
+        datasets = [{
+            label: 'Hombres',
+            data: maleHistogram.counts,
+            backgroundColor: 'rgba(248, 180, 0, 0.7)'
+        }];
+    }
+
+    if (chronologyTimeChartInstance) {
+        chronologyTimeChartInstance.destroy();
+        chronologyTimeChartInstance = null;
+    }
+
+    chronologyTimeChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: histogram.labels,
-            datasets: [
-                {
-                    label: 'Mujeres',
-                    data: femaleHistogram.labels.length ? femaleHistogram.counts : new Array(histogram.labels.length).fill(0),
-                    backgroundColor: 'rgba(72, 187, 120, 0.7)'
-                },
-                {
-                    label: 'Hombres',
-                    data: maleHistogram.labels.length ? maleHistogram.counts : new Array(histogram.labels.length).fill(0),
-                    backgroundColor: 'rgba(248, 180, 0, 0.7)'
-                }
-            ]
+            labels: chartLabels,
+            datasets
         },
         options: {
             responsive: true,
@@ -1816,14 +1855,54 @@ async function initializeChronology() {
         const genderSelect = document.getElementById('chronologyGenderFilter');
         const categorySelect = document.getElementById('chronologyCategoryFilter');
         const applyButton = document.getElementById('applyChronologyFilters');
-        const timeStatus1k = document.getElementById('chronologyTimeStatus1k');
-        const timeStatus5k = document.getElementById('chronologyTimeStatus5k');
+        const timeStatus = document.getElementById('chronologyTimeStatus');
+        const distanceToggleButtons = document.querySelectorAll('[data-distance-toggle]');
+        const genderToggleButtons = document.querySelectorAll('[data-gender-toggle]');
+        const activeFiltersSummary = document.getElementById('activeFiltersSummary');
+
+        let activeDistance = '1K';
+        let activeGenderView = 'combined';
+        let lastFilteredRecords = normalizedRecords;
+
+        const setActiveToggle = (buttons, value, attribute) => {
+            buttons.forEach(button => {
+                const isActive = button.getAttribute(attribute) === value;
+                button.classList.toggle('active', isActive);
+            });
+        };
+
+        const updateActiveFiltersSummary = () => {
+            if (!activeFiltersSummary) return;
+
+            const chips = [];
+
+            if (eventSelect && eventSelect.value) {
+                const label = eventSelect.selectedOptions[0]?.textContent || eventSelect.value;
+                chips.push(`<span class="filter-chip">Evento: ${label}</span>`);
+            }
+
+            if (genderSelect && genderSelect.value) {
+                chips.push(`<span class="filter-chip">Sexo: ${genderSelect.value}</span>`);
+            }
+
+            if (categorySelect && categorySelect.value) {
+                chips.push(`<span class="filter-chip">Edad: ${categorySelect.value}</span>`);
+            }
+
+            activeFiltersSummary.innerHTML = chips.length
+                ? chips.join('')
+                : '<span class="text-gray-400">Sin filtros aplicados</span>';
+        };
 
         const preferredEvent = eventOptions.find(option => option.edition === 66 && option.year === 2025) || eventOptions[0];
 
         if (eventSelect && preferredEvent) {
             eventSelect.value = preferredEvent.value;
         }
+
+        const renderFilteredTimeChart = () => {
+            renderChronologyTimeChartForDistance(lastFilteredRecords, activeDistance, timeStatus, activeGenderView);
+        };
 
         const applyFilters = () => {
             const eventValue = eventSelect ? eventSelect.value : '';
@@ -1843,9 +1922,29 @@ async function initializeChronology() {
             setTextContent('filtered-female', genderCounts.femaleCount || '0');
             setTextContent('filtered-male', genderCounts.maleCount || '0');
 
-            renderChronologyTimeChartForDistance(filtered, '1K', timeStatus1k);
-            renderChronologyTimeChartForDistance(filtered, '5K', timeStatus5k);
+            lastFilteredRecords = filtered;
+            renderFilteredTimeChart();
+            updateActiveFiltersSummary();
         };
+
+        distanceToggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                activeDistance = button.getAttribute('data-distance-toggle');
+                setActiveToggle(distanceToggleButtons, activeDistance, 'data-distance-toggle');
+                renderFilteredTimeChart();
+            });
+        });
+
+        genderToggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                activeGenderView = button.getAttribute('data-gender-toggle');
+                setActiveToggle(genderToggleButtons, activeGenderView, 'data-gender-toggle');
+                renderFilteredTimeChart();
+            });
+        });
+
+        setActiveToggle(distanceToggleButtons, activeDistance, 'data-distance-toggle');
+        setActiveToggle(genderToggleButtons, activeGenderView, 'data-gender-toggle');
 
         [eventSelect, genderSelect, categorySelect].forEach(select => {
             if (select) {
