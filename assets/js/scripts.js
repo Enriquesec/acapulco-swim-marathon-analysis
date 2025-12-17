@@ -1082,11 +1082,30 @@ const getStateTileColor = (count, maxCount) => {
 };
 
 const renderStateMap = (stateParticipantMap) => {
-    const mapFrame = document.getElementById('stateMapEmbed');
     const list = document.getElementById('stateTopList');
+    const grid = document.getElementById('stateMapGrid');
 
-    if (mapFrame) {
-        mapFrame.loading = 'lazy';
+    if (grid) {
+        grid.innerHTML = '';
+
+        const maxCount = Math.max(
+            1,
+            ...stateTileLayout.map(tile => stateParticipantMap?.get(tile.name)?.size || 0)
+        );
+
+        stateTileLayout.forEach(tile => {
+            const count = stateParticipantMap?.get(tile.name)?.size || 0;
+
+            const tileElement = document.createElement('div');
+            tileElement.className = 'state-tile';
+            tileElement.style.gridRow = tile.row;
+            tileElement.style.gridColumn = tile.col;
+            tileElement.style.background = getStateTileColor(count, maxCount);
+            tileElement.title = `${tile.name}: ${formatNumber(count)} participantes`;
+            tileElement.innerHTML = `<span>${tile.code}</span><strong>${formatNumber(count)}</strong>`;
+
+            grid.appendChild(tileElement);
+        });
     }
 
     if (list) {
@@ -1183,13 +1202,14 @@ const buildTimeHistogram = (values, binSize = 5, customRange = null) => {
     return { labels, counts, range: { min: minValue, max: maxValue } };
 };
 
-const getTimesByGenderWithinLimits = (records) => {
+const getTimesByGenderWithinLimits = (records, timeLimit = null) => {
     const grouped = { overall: [], male: [], female: [] };
 
     records.forEach(record => {
         const time = record?.timeMinutes;
 
         if (typeof time !== 'number' || Number.isNaN(time)) return;
+        if (typeof timeLimit === 'number' && time > timeLimit) return;
 
         grouped.overall.push(time);
 
@@ -1608,7 +1628,8 @@ const renderChronologyTimeChartForDistance = (records, distanceLabel, statusElem
 
     const distanceKey = distanceLabel.toUpperCase();
     const filteredRecords = records.filter(record => (record?.distance || '').toUpperCase() === distanceKey);
-    const timesByGender = getTimesByGenderWithinLimits(filteredRecords);
+    const timeLimit = getTimeLimitForRecord({ distance: distanceKey });
+    const timesByGender = getTimesByGenderWithinLimits(filteredRecords, timeLimit);
     const combinedTimes = [...timesByGender.female, ...timesByGender.male];
 
     if (chronologyTimeChartInstances[distanceKey]) {
