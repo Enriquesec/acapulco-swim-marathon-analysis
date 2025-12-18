@@ -1,6 +1,6 @@
 <div class="container mx-auto space-y-6">
     <section class="grid gap-6 xl:grid-cols-12 items-start pt-6">
-        <div class="xl:col-span-8 space-y-6">
+        <div class="xl:col-span-7 space-y-6">
             <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl border border-gray-700/70 shadow-md">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
@@ -9,7 +9,7 @@
                         <p class="text-sm text-gray-200">Datos históricos en un vistazo.</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mt-5">
                     <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
                         <p class="text-xs text-gray-400 uppercase">Eventos</p>
                         <p id="summary-events" class="text-3xl font-extrabold text-green-400 mt-1">—</p>
@@ -26,38 +26,34 @@
                         <p class="text-xs text-gray-400 uppercase">5K</p>
                         <p id="summary-5k" class="text-3xl font-bold text-green-400 mt-1">—</p>
                     </div>
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">Mujeres</p>
+                        <p id="summary-female" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                    </div>
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-700/60">
+                        <p class="text-xs text-gray-400 uppercase">Hombres</p>
+                        <p id="summary-male" class="text-3xl font-bold text-green-400 mt-1">—</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-green-400">Distribución por sexo</h3>
-                    <span class="text-xs text-gray-400">Participantes únicos</span>
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
+                    <div class="chart-wrapper h-60">
+                        <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
+                    </div>
                 </div>
-                <div class="chart-wrapper h-52 mt-2">
-                    <canvas id="genderSummaryChart" class="chart-canvas"></canvas>
-                </div>
-            </div>
 
-            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
-                <div class="chart-wrapper h-60">
-                    <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-green-400">Distribución por edad</h3>
-                    <span class="text-xs text-gray-400">General</span>
-                </div>
-                <div class="chart-wrapper mt-2 h-64">
-                    <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
+                <div class="bg-gray-800 text-white p-5 rounded-lg shadow-sm border border-gray-700/70">
+                    <div class="chart-wrapper h-64">
+                        <canvas id="chronologyAgeChart" class="chart-canvas"></canvas>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-        <aside class="xl:col-span-4 space-y-4 xl:sticky xl:top-6">
+        <aside class="xl:col-span-5 space-y-4 xl:sticky xl:top-6">
             <details open class="bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-700/70">
                 <summary class="text-lg font-semibold text-green-400 cursor-pointer">Filtros</summary>
                 <div class="mt-4 space-y-4">
