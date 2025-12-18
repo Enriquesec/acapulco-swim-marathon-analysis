@@ -112,6 +112,17 @@
                         <canvas id="chronologyTimeChart" class="chart-canvas"></canvas>
                     </div>
                 </div>
+
+                <div class="bg-gray-900/60 rounded-lg border border-gray-700/60 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-green-400">Participantes filtrados</p>
+                            <p class="text-sm text-gray-400">Haz clic en un nombre para abrir su historial.</p>
+                        </div>
+                        <span id="chronologyParticipantsCount" class="text-lg font-semibold text-green-400">—</span>
+                    </div>
+                    <div id="chronologyParticipantsList" class="flex flex-wrap gap-2 text-sm"></div>
+                </div>
             </section>
         </aside>
     </section>

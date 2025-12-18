@@ -115,6 +115,8 @@ const pointValueLabelPlugin = {
     }
 };
 
+window.pendingParticipantNavigation = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('nav a[data-target]'); // Selecciona todos los enlaces del nav
     const navContainer = document.getElementById('navbar-container');
@@ -130,16 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const mountContent = (targetFile, content) => {
+    const mountContent = (targetFile, content, afterMount) => {
         contentDiv.innerHTML = content; // Inserta el contenido en el div
         initializeCharts(); // Llama a una función para inicializar los gráficos
         initializeEventListeners(); // Llama a una función para los nuevos listeners
         initializeSwiper(); // Llama a una función para inicializar el carrusel
         setActiveLink(targetFile);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof afterMount === 'function') {
+            afterMount();
+        }
     };
 
-    const loadContent = async (targetFile) => {
+    const loadContent = async (targetFile, afterMount) => {
         if (!targetFile) return;
 
         try {
@@ -147,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.innerHTML = '<p class="text-center text-gray-400 py-6">Cargando sección...</p>';
 
             if (contentCache.has(targetFile)) {
-                mountContent(targetFile, contentCache.get(targetFile));
+                mountContent(targetFile, contentCache.get(targetFile), afterMount);
                 return;
             }
 
@@ -158,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const content = await response.text(); // Convierte la respuesta a texto
             contentCache.set(targetFile, content);
-            mountContent(targetFile, content);
+            mountContent(targetFile, content, afterMount);
         } catch (error) {
             console.error(error);
             contentDiv.innerHTML = `<p class="text-center text-red-400 py-6">${error.message}</p>`;
@@ -166,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.removeAttribute('aria-busy');
         }
     };
+
+    window.navigateToSection = loadContent;
 
     links.forEach(link => {
         link.addEventListener('click', (event) => {
@@ -196,6 +203,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+const navigateToResultsDetail = (participantKey, participantName = '') => {
+    window.pendingParticipantNavigation = {
+        key: normalizeText(participantKey),
+        name: participantName
+    };
+
+    if (typeof window.navigateToSection === 'function') {
+        window.navigateToSection('resultados.html');
+    }
+};
 
 async function setupResultsPage() {
     const searchInput = document.getElementById('searchInput');
@@ -657,6 +675,36 @@ async function setupResultsPage() {
             renderDetailRecords();
         };
 
+        const openParticipantFromNavigation = () => {
+            const pending = window.pendingParticipantNavigation;
+            if (!pending || !pending.key) return;
+
+            const normalizedKey = normalizeText(pending.key);
+            const match = combinedData.find(item =>
+                item.key === normalizedKey || normalizeText(item.name) === normalizedKey
+            );
+
+            const searchTerm = pending.name || match?.name || pending.key;
+            searchInput.value = searchTerm;
+            setSearchButtonState(normalizeText(searchTerm));
+
+            if (match) {
+                renderResults([match]);
+                renderParticipantDetail(match);
+            } else {
+                handleSearch();
+                const fallback = combinedData.find(item =>
+                    item.searchIndex && item.searchIndex.includes(normalizedKey)
+                );
+
+                if (fallback) {
+                    renderParticipantDetail(fallback);
+                }
+            }
+
+            window.pendingParticipantNavigation = null;
+        };
+
         resultsContainer.addEventListener('click', (event) => {
             const card = event.target.closest('[data-competitor-key]');
             if (!card) return;
@@ -667,6 +715,8 @@ async function setupResultsPage() {
                 renderParticipantDetail(participant);
             }
         });
+
+        openParticipantFromNavigation();
     } catch (error) {
         resultsContainer.innerHTML = '<p class="col-span-full text-red-500">Error al cargar los datos de resultados.</p>';
         hideResultsNavigation();
@@ -1856,6 +1906,8 @@ async function initializeChronology() {
         const distanceToggleButtons = document.querySelectorAll('[data-distance-toggle]');
         const genderToggleButtons = document.querySelectorAll('[data-gender-toggle]');
         const activeFiltersSummary = document.getElementById('activeFiltersSummary');
+        const participantsList = document.getElementById('chronologyParticipantsList');
+        const participantsCount = document.getElementById('chronologyParticipantsCount');
 
         let activeDistance = '1K';
         let activeGenderView = 'combined';
@@ -1866,6 +1918,30 @@ async function initializeChronology() {
                 const isActive = button.getAttribute(attribute) === value;
                 button.classList.toggle('active', isActive);
             });
+        };
+
+        const renderParticipantChips = (participants) => {
+            if (!participantsList || !participantsCount) return;
+
+            participantsCount.textContent = formatNumber(participants.length || 0);
+
+            if (!participants.length) {
+                participantsList.innerHTML = '<p class="text-gray-400">No hay participantes que coincidan con los filtros seleccionados.</p>';
+                return;
+            }
+
+            const chips = participants.slice(0, 24).map(participant => `
+                <button
+                    type="button"
+                    class="px-3 py-2 rounded-full bg-gray-800 border border-gray-700 hover:border-green-400 transition text-white"
+                    data-participant-key="${participant.key}"
+                    data-participant-name="${participant.name}"
+                >
+                    ${participant.name}
+                </button>
+            `);
+
+            participantsList.innerHTML = chips.join('');
         };
 
         const updateActiveFiltersSummary = () => {
@@ -1919,6 +1995,19 @@ async function initializeChronology() {
             setTextContent('filtered-female', genderCounts.femaleCount || '0');
             setTextContent('filtered-male', genderCounts.maleCount || '0');
 
+            const participantMap = new Map();
+            filtered.forEach(record => {
+                if (!record?.participantKey) return;
+                if (participantMap.has(record.participantKey)) return;
+
+                participantMap.set(record.participantKey, {
+                    key: record.participantKey,
+                    name: record.name || 'Participante sin nombre'
+                });
+            });
+
+            renderParticipantChips(Array.from(participantMap.values()));
+
             lastFilteredRecords = filtered;
             renderFilteredTimeChart();
             updateActiveFiltersSummary();
@@ -1939,6 +2028,19 @@ async function initializeChronology() {
                 renderFilteredTimeChart();
             });
         });
+
+        if (participantsList) {
+            participantsList.addEventListener('click', (event) => {
+                const chip = event.target.closest('[data-participant-key]');
+                if (!chip) return;
+
+                const key = chip.getAttribute('data-participant-key');
+                const name = chip.getAttribute('data-participant-name') || chip.textContent;
+                if (key) {
+                    navigateToResultsDetail(key, name);
+                }
+            });
+        }
 
         setActiveToggle(distanceToggleButtons, activeDistance, 'data-distance-toggle');
         setActiveToggle(genderToggleButtons, activeGenderView, 'data-gender-toggle');
