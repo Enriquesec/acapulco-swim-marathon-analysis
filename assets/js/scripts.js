@@ -2066,6 +2066,17 @@ async function initializeHonorBoard() {
     const nextButton = document.getElementById('honorBoardNext');
     const slideInfo = document.getElementById('honorBoardSlideInfo');
 
+    tableBody.addEventListener('click', (event) => {
+        const chip = event.target.closest('[data-participant-key]');
+        if (!chip) return;
+
+        const key = chip.getAttribute('data-participant-key');
+        const name = chip.getAttribute('data-participant-name') || chip.textContent;
+        if (key) {
+            navigateToResultsDetail(key, name);
+        }
+    });
+
     tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-gray-400">Calculando medallero...</td></tr>';
 
     try {
@@ -2126,8 +2137,17 @@ async function initializeHonorBoard() {
                     <tr class="border-b border-gray-800 ${highlight}">
                         <td class="py-3 px-2 text-sm text-gray-400">${position}</td>
                         <td class="py-3 px-2">
-                            <div class="font-semibold text-white">${athlete.name}</div>
-                            <p class="text-xs text-gray-400">${athlete.origin || 'Procedencia no registrada'}</p>
+                            <div class="space-y-1">
+                                <button
+                                    type="button"
+                                    class="px-3 py-2 rounded-full bg-gray-800 border border-gray-700 hover:border-green-400 transition text-white"
+                                    data-participant-key="${athlete.key}"
+                                    data-participant-name="${athlete.name}"
+                                >
+                                    ${athlete.name}
+                                </button>
+                                <p class="text-xs text-gray-400">${athlete.origin || 'Procedencia no registrada'}</p>
+                            </div>
                         </td>
                         <td class="py-3 px-2 text-center text-yellow-300 font-semibold">${formatNumber(gold)}</td>
                         <td class="py-3 px-2 text-center text-gray-200">${formatNumber(silver)}</td>
