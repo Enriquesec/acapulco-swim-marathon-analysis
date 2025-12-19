@@ -1882,10 +1882,10 @@ async function initializeChronology() {
         const genderSummary = summarizeGenderCounts(normalizedRecords);
         const totalUniqueParticipants = genderSummary.totalUnique;
 
-        setTextContent('summary-events', events.length || '0');
-        setTextContent('summary-participants', totalUniqueParticipants || '0');
-        setTextContent('summary-female', genderSummary.femaleCount || '0');
-        setTextContent('summary-male', genderSummary.maleCount || '0');
+        setTextContent('summary-events', formatNumber(events.length || 0));
+        setTextContent('summary-participants', formatNumber(totalUniqueParticipants || 0));
+        setTextContent('summary-female', formatNumber(genderSummary.femaleCount || 0));
+        setTextContent('summary-male', formatNumber(genderSummary.maleCount || 0));
 
         renderGenderSummaryChart({
             Mujeres: genderSummary.femaleCount,
@@ -1894,11 +1894,61 @@ async function initializeChronology() {
 
         const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
         const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
-        setTextContent('summary-1k', oneKParticipants || '0');
-        setTextContent('summary-5k', fiveKParticipants || '0');
+        setTextContent('summary-1k', formatNumber(oneKParticipants || 0));
+        setTextContent('summary-5k', formatNumber(fiveKParticipants || 0));
 
         renderChronologyAgeChart(normalizedRecords);
-        renderEventTrendChart(aggregateParticipantsByEvent(normalizedRecords));
+
+        const participantsByEvent = aggregateParticipantsByEvent(normalizedRecords);
+        renderEventTrendChart(participantsByEvent);
+
+        const updateEventGrowthSummary = (eventsStats = []) => {
+            const growthCountEl = document.getElementById('summary-growth-count');
+            const growthPercentEl = document.getElementById('summary-growth-percent');
+            const growthContextEl = document.getElementById('summary-growth-context');
+            const calloutDeltaEl = document.getElementById('trend-callout-delta');
+            const calloutLabelEl = document.getElementById('trend-callout-label');
+
+            const latest = eventsStats[eventsStats.length - 1];
+            const previous = eventsStats[eventsStats.length - 2];
+
+            if (!latest) {
+                setTextContent('summary-growth-count', '—');
+                setTextContent('summary-growth-percent', '—');
+                setTextContent('summary-growth-context', 'Sin datos suficientes.');
+                setTextContent('trend-callout-delta', '—');
+                setTextContent('trend-callout-label', 'Sin ediciones registradas');
+                if (growthPercentEl) growthPercentEl.classList.remove('negative');
+                return;
+            }
+
+            const diff = previous ? latest.count - previous.count : null;
+            const percent = previous && previous.count
+                ? Math.round((diff / previous.count) * 100)
+                : null;
+
+            const formattedDiff = diff !== null ? `${diff >= 0 ? '+' : ''}${formatNumber(diff)}` : 'N/D';
+            const formattedPercent = percent !== null ? `${percent >= 0 ? '+' : ''}${percent}%` : '—';
+            const contextLabel = previous ? `Comparado con ${previous.label}` : 'Esperando más ediciones para comparar.';
+
+            setTextContent('summary-growth-count', formattedDiff);
+            setTextContent('summary-growth-percent', formattedPercent);
+            setTextContent('summary-growth-context', contextLabel);
+            setTextContent('trend-callout-delta', previous ? `${formattedPercent} vs edición previa` : `${formatNumber(latest.count)} participantes`);
+            setTextContent('trend-callout-label', latest.label || 'Última edición');
+
+            if (growthPercentEl) {
+                growthPercentEl.classList.toggle('negative', typeof percent === 'number' && percent < 0);
+            }
+            if (growthContextEl) {
+                growthContextEl.classList.toggle('text-gray-400', !previous);
+            }
+            if (calloutDeltaEl) {
+                calloutDeltaEl.classList.toggle('text-green-300', !previous);
+            }
+        };
+
+        updateEventGrowthSummary(participantsByEvent);
 
         const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.ageGroup))).filter(Boolean).sort();
         const eventOptions = events.map(event => {
@@ -1923,6 +1973,7 @@ async function initializeChronology() {
         const genderSelect = document.getElementById('chronologyGenderFilter');
         const categorySelect = document.getElementById('chronologyCategoryFilter');
         const timeStatus = document.getElementById('chronologyTimeStatus');
+        const resetFiltersButton = document.getElementById('resetChronologyFilters');
         const distanceToggleButtons = document.querySelectorAll('[data-distance-toggle]');
         const genderToggleButtons = document.querySelectorAll('[data-gender-toggle]');
         const activeFiltersSummary = document.getElementById('activeFiltersSummary');
@@ -1953,7 +2004,7 @@ async function initializeChronology() {
             const chips = participants.slice(0, 24).map(participant => `
                 <button
                     type="button"
-                    class="px-3 py-2 rounded-full bg-gray-800 border border-gray-700 hover:border-green-400 transition text-white"
+                    class="participant-chip"
                     data-participant-key="${participant.key}"
                     data-participant-name="${participant.name}"
                 >
@@ -2005,9 +2056,9 @@ async function initializeChronology() {
 
             const genderCounts = summarizeGenderCounts(filtered);
 
-            setTextContent('filtered-participants', genderCounts.totalUnique || '0');
-            setTextContent('filtered-female', genderCounts.femaleCount || '0');
-            setTextContent('filtered-male', genderCounts.maleCount || '0');
+            setTextContent('filtered-participants', formatNumber(genderCounts.totalUnique || 0));
+            setTextContent('filtered-female', formatNumber(genderCounts.femaleCount || 0));
+            setTextContent('filtered-male', formatNumber(genderCounts.maleCount || 0));
 
             const participantMap = new Map();
             filtered.forEach(record => {
@@ -2025,6 +2076,17 @@ async function initializeChronology() {
             lastFilteredRecords = filtered;
             renderFilteredTimeChart();
             updateActiveFiltersSummary();
+        };
+
+        const resetFilters = () => {
+            if (eventSelect) eventSelect.value = '';
+            if (genderSelect) genderSelect.value = '';
+            if (categorySelect) categorySelect.value = '';
+            activeDistance = '1K';
+            activeGenderView = 'combined';
+            setActiveToggle(distanceToggleButtons, activeDistance, 'data-distance-toggle');
+            setActiveToggle(genderToggleButtons, activeGenderView, 'data-gender-toggle');
+            applyFilters();
         };
 
         distanceToggleButtons.forEach(button => {
@@ -2064,6 +2126,10 @@ async function initializeChronology() {
                 select.addEventListener('change', applyFilters);
             }
         });
+
+        if (resetFiltersButton) {
+            resetFiltersButton.addEventListener('click', resetFilters);
+        }
 
         applyFilters();
     } catch (error) {
