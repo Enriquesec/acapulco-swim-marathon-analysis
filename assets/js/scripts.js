@@ -1895,7 +1895,7 @@ async function initializeChronology() {
             return a.label.localeCompare(b.label);
         });
 
-        populateSelect('chronologyEventFilter', eventOptions, null, option => option.value, option => option.label);
+        populateSelect('chronologyEventFilter', eventOptions, 'Todos', option => option.value, option => option.label);
         populateSelect('chronologyGenderFilter', genders, 'Todos', gender => gender.raw, gender => gender.raw);
         populateSelect('chronologyCategoryFilter', uniqueCategories, 'Todos', value => value, value => value);
 
@@ -1966,12 +1966,6 @@ async function initializeChronology() {
                 ? chips.join('')
                 : '<span class="text-gray-400">Sin filtros aplicados</span>';
         };
-
-        const preferredEvent = eventOptions.find(option => option.edition === 66 && option.year === 2025) || eventOptions[0];
-
-        if (eventSelect && preferredEvent) {
-            eventSelect.value = preferredEvent.value;
-        }
 
         const renderFilteredTimeChart = () => {
             renderChronologyTimeChartForDistance(lastFilteredRecords, activeDistance, timeStatus, activeGenderView);
