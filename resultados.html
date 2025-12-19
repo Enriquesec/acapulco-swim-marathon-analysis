@@ -22,6 +22,37 @@
         <p class="text-sm text-gray-400">Escribe al menos 6 caracteres y presiona "Buscar" para ver coincidencias.</p>
     </div>
 
+    <!-- Panel detallado del participante al estilo Strava -->
+    <div id="participantDetail" class="mt-4 md:mt-6 bg-gray-900/70 backdrop-blur rounded-xl border border-gray-800 p-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="space-y-1">
+                <div class="flex flex-wrap gap-2 text-xs text-gray-400">
+                    <span class="px-2 py-1 bg-gray-800 rounded-full">Estado: <span id="detailOrigin">N/D</span></span>
+                    <span class="px-2 py-1 bg-gray-800 rounded-full">Equipo: <span id="detailTeam">N/D</span></span>
+                </div>
+                <p class="text-xs uppercase tracking-wide text-green-400">Perfil</p>
+                <h3 id="detailName" class="text-2xl font-bold">Selecciona un participante</h3>
+                <p id="detailMeta" class="text-sm text-gray-400">Aquí verás sus participaciones, posiciones y evolución.</p>
+            </div>
+            <button id="closeParticipantDetail" class="px-3 py-2 text-sm bg-gray-800 rounded-lg hover:bg-gray-700">Cerrar</button>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+            <div class="md:col-span-3 space-y-2">
+                <p class="text-xs text-gray-400">Distancia</p>
+                <select id="detailDistanceFilter" class="w-full bg-gray-800 text-white p-3 rounded-lg">
+                    <option value="">Todas</option>
+                    <option value="1K">1K</option>
+                    <option value="6K">6K</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="detailContent" class="space-y-4 text-sm text-gray-300">
+            <p class="text-gray-400">Haz clic en un participante para ver sus resultados desglosados por distancia y filtra sus categorías.</p>
+        </div>
+    </div>
+
     <!-- Contenedor para mostrar los resultados -->
     <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Los resultados de la búsqueda se insertarán aquí -->
@@ -43,36 +74,5 @@
         >
             Siguiente
         </button>
-    </div>
-
-    <!-- Panel detallado del participante al estilo Strava -->
-    <div id="participantDetail" class="mt-10 bg-gray-900/70 backdrop-blur rounded-xl border border-gray-800 p-6 hidden">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div class="space-y-1">
-                <div class="flex flex-wrap gap-2 text-xs text-gray-400">
-                    <span class="px-2 py-1 bg-gray-800 rounded-full">Estado: <span id="detailOrigin">N/D</span></span>
-                    <span class="px-2 py-1 bg-gray-800 rounded-full">Equipo: <span id="detailTeam">N/D</span></span>
-                </div>
-                <p class="text-xs uppercase tracking-wide text-green-400">Perfil</p>
-                <h3 id="detailName" class="text-2xl font-bold">Selecciona un participante</h3>
-                <p id="detailMeta" class="text-sm text-gray-400">Aquí verás sus participaciones, posiciones y evolución.</p>
-            </div>
-            <button id="closeParticipantDetail" class="px-3 py-2 text-sm bg-gray-800 rounded-lg hover:bg-gray-700">Cerrar</button>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-4 mb-4">
-            <div class="md:col-span-3 space-y-2">
-                <p class="text-xs text-gray-400">Distancia</p>
-                <select id="detailDistanceFilter" class="w-full bg-gray-800 text-white p-3 rounded-lg">
-                    <option value="">Todas</option>
-                    <option value="1K">1K</option>
-                    <option value="5K">5K</option>
-                </select>
-            </div>
-        </div>
-
-        <div id="detailContent" class="space-y-4 text-sm text-gray-300">
-            <p class="text-gray-400">Haz clic en un participante para ver sus resultados desglosados por distancia y filtra sus categorías.</p>
-        </div>
     </div>
 </div>
