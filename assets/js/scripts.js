@@ -598,23 +598,28 @@ async function setupResultsPage() {
                 if (!selectedParticipant) return;
                 const distanceFilter = detailDistanceFilter?.value || '';
 
+                const mapDetailDistance = (value) => {
+                    const normalized = normalizeDistanceLabel(value);
+                    return normalized === '5K' ? '6K' : normalized;
+                };
+
                 const filtered = selectedParticipant.records.filter(record => {
-                    const normalizedDistance = normalizeDistanceLabel(record.distance);
+                    const normalizedDistance = mapDetailDistance(record.distance);
                     const matchesDistance = distanceFilter ? normalizedDistance === distanceFilter : true;
                     return matchesDistance;
                 });
 
                 const sections = [
                     { label: '1K', distance: '1K' },
-                    { label: '5K', distance: '5K' },
+                    { label: '6K', distance: '6K' },
                     { label: 'Otras distancias', distance: 'OTHER' }
                 ];
 
                 const buildSection = (section) => {
                     const sectionRecords = filtered.filter(record => {
-                        const normalizedDistance = normalizeDistanceLabel(record.distance);
+                        const normalizedDistance = mapDetailDistance(record.distance);
                         if (section.distance === 'OTHER') {
-                            return normalizedDistance !== '1K' && normalizedDistance !== '5K';
+                            return normalizedDistance !== '1K' && normalizedDistance !== '6K';
                         }
                         return normalizedDistance === section.distance;
                     });
@@ -658,8 +663,23 @@ async function setupResultsPage() {
                     `;
                 };
 
-                const renderedSections = sections.map(buildSection).filter(Boolean).join('');
-                detailContent.innerHTML = renderedSections || '<p class="text-gray-400">No hay participaciones que coincidan con los filtros seleccionados.</p>';
+                const primarySections = sections
+                    .filter(section => section.distance !== 'OTHER')
+                    .map(buildSection)
+                    .filter(Boolean);
+
+                const otherSection = buildSection(sections.find(section => section.distance === 'OTHER'));
+
+                const columnsContent = primarySections.length
+                    ? `<div class="grid md:grid-cols-2 gap-4">${primarySections.join('')}</div>`
+                    : '';
+
+                const combinedContent = [
+                    columnsContent,
+                    otherSection ? `<div class="space-y-3">${otherSection}</div>` : ''
+                ].filter(Boolean).join('');
+
+                detailContent.innerHTML = combinedContent || '<p class="text-gray-400">No hay participaciones que coincidan con los filtros seleccionados.</p>';
             };
 
             if (detailDistanceFilter) {
