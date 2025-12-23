@@ -1879,23 +1879,27 @@ async function initializeChronology() {
             .map(normalizeRecordForStats)
             .filter(Boolean);
 
-        const genderSummary = summarizeGenderCounts(normalizedRecords);
-        const totalUniqueParticipants = genderSummary.totalUnique;
+        const updateChronologySummary = (records) => {
+            const genderSummary = summarizeGenderCounts(records);
+            const uniqueEventsCount = new Set(records.map(record => record.eventKey)).size;
 
-        setTextContent('summary-events', formatNumber(events.length || 0));
-        setTextContent('summary-participants', formatNumber(totalUniqueParticipants || 0));
-        setTextContent('summary-female', formatNumber(genderSummary.femaleCount || 0));
-        setTextContent('summary-male', formatNumber(genderSummary.maleCount || 0));
+            const oneKParticipants = new Set(records.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
+            const fiveKParticipants = new Set(records.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
 
-        renderGenderSummaryChart({
-            Mujeres: genderSummary.femaleCount,
-            Hombres: genderSummary.maleCount
-        });
+            setTextContent('summary-events', formatNumber(uniqueEventsCount || 0));
+            setTextContent('summary-participants', formatNumber(genderSummary.totalUnique || 0));
+            setTextContent('summary-female', formatNumber(genderSummary.femaleCount || 0));
+            setTextContent('summary-male', formatNumber(genderSummary.maleCount || 0));
+            setTextContent('summary-1k', formatNumber(oneKParticipants || 0));
+            setTextContent('summary-5k', formatNumber(fiveKParticipants || 0));
 
-        const oneKParticipants = new Set(normalizedRecords.filter(record => record.distance === '1K').map(record => record.participantKey)).size;
-        const fiveKParticipants = new Set(normalizedRecords.filter(record => record.distance === '5K').map(record => record.participantKey)).size;
-        setTextContent('summary-1k', formatNumber(oneKParticipants || 0));
-        setTextContent('summary-5k', formatNumber(fiveKParticipants || 0));
+            renderGenderSummaryChart({
+                Mujeres: genderSummary.femaleCount,
+                Hombres: genderSummary.maleCount
+            });
+        };
+
+        updateChronologySummary(normalizedRecords);
 
         renderChronologyAgeChart(normalizedRecords);
 
@@ -2047,21 +2051,17 @@ async function initializeChronology() {
             const genderValue = genderSelect ? normalizeText(genderSelect.value) : '';
             const categoryValue = categorySelect ? categorySelect.value : '';
 
-            const filtered = normalizedRecords.filter(record => {
+            const filteredRecords = normalizedRecords.filter(record => {
                 const matchesEvent = !eventValue || record.eventKey === eventValue;
                 const matchesGender = !genderValue || normalizeText(record.gender) === genderValue;
                 const matchesCategory = !categoryValue || record.ageGroup === categoryValue;
                 return matchesEvent && matchesGender && matchesCategory;
             });
 
-            const genderCounts = summarizeGenderCounts(filtered);
-
-            setTextContent('filtered-participants', formatNumber(genderCounts.totalUnique || 0));
-            setTextContent('filtered-female', formatNumber(genderCounts.femaleCount || 0));
-            setTextContent('filtered-male', formatNumber(genderCounts.maleCount || 0));
+            updateChronologySummary(filteredRecords);
 
             const participantMap = new Map();
-            filtered.forEach(record => {
+            filteredRecords.forEach(record => {
                 if (!record?.participantKey) return;
                 if (participantMap.has(record.participantKey)) return;
 
@@ -2073,7 +2073,7 @@ async function initializeChronology() {
 
             renderParticipantChips(Array.from(participantMap.values()));
 
-            lastFilteredRecords = filtered;
+            lastFilteredRecords = filteredRecords;
             renderFilteredTimeChart();
             updateActiveFiltersSummary();
         };

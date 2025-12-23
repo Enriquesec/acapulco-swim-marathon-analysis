@@ -388,14 +388,14 @@ footer {
    ========================== */
 
 .dashboard-shell {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.75rem;
 }
 
 .dashboard-compact {
-    max-width: 1200px;
-    padding: 1rem;
+    max-width: 1400px;
+    padding: 1.25rem;
 }
 
 .dashboard-grid {
@@ -406,6 +406,13 @@ footer {
 
 .dashboard-compact .dashboard-grid {
     gap: 0.75rem;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.1fr;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 .panel {
@@ -660,6 +667,10 @@ footer {
 
 @media (max-width: 1200px) {
     .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-grid {
         grid-template-columns: 1fr;
     }
 }
