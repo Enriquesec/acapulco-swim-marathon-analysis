@@ -393,10 +393,19 @@ footer {
     padding: 1.5rem;
 }
 
+.dashboard-compact {
+    max-width: 1200px;
+    padding: 1rem;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1.7fr 1fr;
     gap: 1rem;
+}
+
+.dashboard-compact .dashboard-grid {
+    gap: 0.75rem;
 }
 
 .panel {
@@ -414,6 +423,14 @@ footer {
     justify-content: space-between;
     gap: 1rem;
     margin-bottom: 0.75rem;
+}
+
+.dashboard-compact .panel {
+    padding: 1rem;
+}
+
+.dashboard-compact .panel-header {
+    margin-bottom: 0.5rem;
 }
 
 .panel-title {
@@ -467,7 +484,7 @@ footer {
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.75rem;
+    gap: 0.65rem;
     margin-top: 1rem;
 }
 
@@ -547,6 +564,10 @@ footer {
 .chart-area {
     position: relative;
     height: 320px;
+}
+
+.dashboard-compact .chart-area {
+    height: 260px;
 }
 
 .chart-callout {
