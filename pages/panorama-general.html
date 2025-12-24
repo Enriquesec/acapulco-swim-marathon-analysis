@@ -11,6 +11,43 @@
                 <span id="summary-events" class="text-lg font-extrabold">—</span>
             </div>
         </div>
+        <div class="panel space-y-3 bg-transparent shadow-none p-0">
+            <div class="panel-header px-0">
+                <div>
+                    <p class="eyebrow mb-1">Filtros</p>
+                    <h2 class="panel-title">Vista dinámica de participantes</h2>
+                </div>
+                <button id="resetChronologyFilters" type="button" class="pill-button text-sm">Limpiar filtros</button>
+            </div>
+            <div class="filter-grid">
+                <div class="space-y-1">
+                    <label for="chronologyEventFilter" class="text-xs font-medium text-white">Evento</label>
+                    <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
+                </div>
+                <div class="space-y-1">
+                    <label for="chronologyGenderFilter" class="text-xs font-medium text-white">Sexo</label>
+                    <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="chronologyCategoryFilter" class="text-xs font-medium text-white">Categoría de edad</label>
+                    <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+            </div>
+            <div id="activeFiltersSummary" class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-gray-300"></div>
+        </div>
+    </div>
+
+    <div class="panel space-y-3">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Resumen</p>
+                <h2 class="panel-title">Participantes y composición</h2>
+            </div>
+        </div>
         <div class="stat-grid">
             <div class="stat-card highlight space-y-1">
                 <p class="stat-label">Participantes únicos</p>
@@ -46,40 +83,10 @@
         </div>
     </div>
 
-    <div class="panel space-y-3">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow mb-1">Filtros</p>
-                <h2 class="panel-title">Vista dinámica de participantes</h2>
-            </div>
-            <button id="resetChronologyFilters" type="button" class="pill-button text-sm">Limpiar filtros</button>
-        </div>
-        <div class="filter-grid">
-            <div class="space-y-1">
-                <label for="chronologyEventFilter" class="text-xs font-medium text-white">Evento</label>
-                <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
-            </div>
-            <div class="space-y-1">
-                <label for="chronologyGenderFilter" class="text-xs font-medium text-white">Sexo</label>
-                <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="space-y-1">
-                <label for="chronologyCategoryFilter" class="text-xs font-medium text-white">Categoría de edad</label>
-                <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                    <option value="">Todas</option>
-                </select>
-            </div>
-        </div>
-        <div id="activeFiltersSummary" class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-gray-300"></div>
-    </div>
-
     <section class="insights-grid items-stretch">
         <div class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="eyebrow mb-1">Serie de tiempo</p>
                     <h2 class="panel-title">Participantes por edición</h2>
                 </div>
             </div>
