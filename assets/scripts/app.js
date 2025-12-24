@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Carga el contenido inicial
-    loadContent('inicio.html');
+    loadContent('pages/panorama-general.html');
 
     // Efecto de scroll en la barra de navegación
     window.addEventListener('scroll', () => {
@@ -197,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delegación de eventos para botones cargados dinámicamente
     document.addEventListener('click', (event) => {
         // Comprobar si el clic fue en el botón de "Ver Convocatoria Completa"
-        if (event.target.matches('a[data-target="convocatoria.html"]')) {
+        if (event.target.matches('a[data-target="pages/convocatoria-oficial.html"]')) {
             event.preventDefault();
-            loadContent('convocatoria.html');
+            loadContent('pages/convocatoria-oficial.html');
         }
     });
 });
@@ -211,7 +211,7 @@ const navigateToResultsDetail = (participantKey, participantName = '') => {
     };
 
     if (typeof window.navigateToSection === 'function') {
-        window.navigateToSection('resultados.html');
+        window.navigateToSection('pages/resumen-resultados.html');
     }
 };
 
@@ -410,8 +410,8 @@ async function setupResultsPage() {
 
     try {
         const [rawResults, participantsCatalog] = await Promise.all([
-            fetchJson('./assets/data/history_results.json'),
-            fetchJson('./assets/data/participants.json').catch(error => {
+            fetchJson('./assets/datasets/history_results.json'),
+            fetchJson('./assets/datasets/participants.json').catch(error => {
                 console.warn('No se pudo cargar participants.json:', error);
                 return [];
             })
@@ -1870,9 +1870,9 @@ async function initializeChronology() {
 
     try {
         const [events, genders, rawResults] = await Promise.all([
-            fetchJson('./assets/data/events.json'),
-            fetchJson('./assets/data/genders.json'),
-            fetchJson('./assets/data/history_results.json')
+            fetchJson('./assets/datasets/events.json'),
+            fetchJson('./assets/datasets/genders.json'),
+            fetchJson('./assets/datasets/history_results.json')
         ]);
 
         const normalizedRecords = rawResults
@@ -2160,7 +2160,7 @@ async function initializeHonorBoard() {
     tableBody.innerHTML = '<tr><td colspan="9" class="py-4 px-2 text-center text-gray-400">Calculando medallero...</td></tr>';
 
     try {
-        const rawResults = await fetchJson('./assets/data/history_results.json');
+        const rawResults = await fetchJson('./assets/datasets/history_results.json');
         const normalizedRecords = rawResults.map(normalizeRecordForStats).filter(Boolean);
         const rankedMedalists = rankMedalists(normalizedRecords);
 
