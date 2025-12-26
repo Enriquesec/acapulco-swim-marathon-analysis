@@ -1904,6 +1904,7 @@ async function initializeChronology() {
 
             setTextContent('summary-events', formatNumber(uniqueEventsCount || 0));
             setTextContent('summary-participants', formatNumber(genderSummary.totalUnique || 0));
+            setTextContent('summary-participants-hero', formatNumber(genderSummary.totalUnique || 0));
             setTextContent('summary-female', formatNumber(genderSummary.femaleCount || 0));
             setTextContent('summary-male', formatNumber(genderSummary.maleCount || 0));
             setTextContent('summary-1k', formatNumber(oneKParticipants || 0));
@@ -1993,7 +1994,6 @@ async function initializeChronology() {
         const genderSelect = document.getElementById('chronologyGenderFilter');
         const categorySelect = document.getElementById('chronologyCategoryFilter');
         const timeStatus = document.getElementById('chronologyTimeStatus');
-        const resetFiltersButton = document.getElementById('resetChronologyFilters');
         const distanceToggleButtons = document.querySelectorAll('[data-distance-toggle]');
         const genderToggleButtons = document.querySelectorAll('[data-gender-toggle]');
         const activeFiltersSummary = document.getElementById('activeFiltersSummary');
