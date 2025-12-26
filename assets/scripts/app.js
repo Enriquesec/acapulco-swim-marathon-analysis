@@ -18,6 +18,17 @@ const extractYearFromEvent = (eventString = '') => {
     return match ? match[0] : 'Año N/D';
 };
 
+const formatShortEventLabel = (edition, year, fallback = 'Evento') => {
+    const editionValue = Number.isFinite(edition) ? edition : parseInt(edition, 10);
+    const editionLabel = editionValue && !Number.isNaN(editionValue) ? `${editionValue}°` : null;
+    const yearLabel = year && !Number.isNaN(year) ? year : null;
+
+    if (editionLabel && yearLabel) return `${editionLabel}, ${yearLabel}`;
+    if (editionLabel) return editionLabel;
+    if (yearLabel) return `${yearLabel}`;
+    return fallback;
+};
+
 const parseEventInfo = (eventString = '') => {
     const eventPattern = /id=(\d+)_([\d]+)_marat[oó]n_acapulco_(\d{4})/i;
     const match = eventString.match(eventPattern);
@@ -986,7 +997,7 @@ const aggregateParticipantsByEvent = (records) => {
 
     return Array.from(eventMap.values())
         .map(event => ({
-            label: event.label,
+            label: formatShortEventLabel(event.edition, event.year, event.label),
             year: event.year,
             edition: event.edition,
             count: event.participants.size
@@ -1813,13 +1824,14 @@ const renderEventTrendChart = (data) => {
         data: {
             labels: data.map(item => item.label),
             datasets: [{
-                label: 'Participantes únicos por evento',
+                label: 'Participantes únicos',
                 data: data.map(item => item.count),
-                borderColor: '#48bb78',
-                backgroundColor: 'rgba(72, 187, 120, 0.2)',
+                borderColor: '#22d3ee',
+                backgroundColor: 'rgba(34, 211, 238, 0.2)',
                 tension: 0.3,
                 fill: true,
                 pointRadius: 5,
+                pointBackgroundColor: '#38bdf8',
                 pointHoverRadius: 7
             }]
         },
@@ -1827,7 +1839,11 @@ const renderEventTrendChart = (data) => {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    labels: {
+                        color: '#e2e8f0'
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: context => `${formatNumber(context.parsed.y)} participantes`

@@ -410,9 +410,13 @@ footer {
 
 .insights-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1.1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
     align-items: stretch;
+}
+
+.insights-grid-combined .wide-card {
+    grid-column: span 2;
 }
 
 .panel {
@@ -671,7 +675,13 @@ footer {
     }
 
     .insights-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .insights-grid-combined .wide-card {
+        grid-column: span 1;
     }
 }
 
