@@ -985,12 +985,19 @@ const aggregateParticipantsByEvent = (records) => {
     });
 
     return Array.from(eventMap.values())
-        .map(event => ({
-            label: event.label,
-            year: event.year,
-            edition: event.edition,
-            count: event.participants.size
-        }))
+        .map(event => {
+            const editionLabel = event.edition ? `${event.edition}°` : null;
+            const yearLabel = event.year || 'Año N/D';
+            const compactLabel = editionLabel ? `${editionLabel}, ${yearLabel}` : `${yearLabel}`;
+
+            return {
+                label: event.label,
+                compactLabel,
+                year: event.year,
+                edition: event.edition,
+                count: event.participants.size
+            };
+        })
         .sort((a, b) => {
             if (a.edition !== b.edition) return a.edition - b.edition;
             if (a.year !== b.year) return a.year - b.year;
@@ -1808,10 +1815,12 @@ const renderEventTrendChart = (data) => {
 
     if (!data.length) return;
 
+    const labels = data.map(item => item.compactLabel || item.label);
+
     yearTrendChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
-            labels: data.map(item => item.label),
+            labels,
             datasets: [{
                 label: 'Participantes únicos por evento',
                 data: data.map(item => item.count),
@@ -1830,6 +1839,10 @@ const renderEventTrendChart = (data) => {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
+                        title: context => {
+                            const index = context[0]?.dataIndex ?? 0;
+                            return data[index]?.label || context[0]?.label || '';
+                        },
                         label: context => `${formatNumber(context.parsed.y)} participantes`
                     }
                 }
@@ -1848,7 +1861,7 @@ const renderEventTrendChart = (data) => {
                 x: {
                     ticks: {
                         color: '#e2e8f0',
-                        font: { size: 13 }
+                        font: { size: 12 }
                     }
                 }
             }
