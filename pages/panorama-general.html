@@ -1,29 +1,45 @@
 <div class="dashboard-shell dashboard-compact space-y-4">
     <div class="panel hero-card">
-        <div class="panel-header hero-header">
+        <div class="panel-header">
             <div class="space-y-1">
                 <p class="eyebrow">Dashboard</p>
                 <h1 class="text-3xl md:text-4xl font-extrabold leading-tight text-white">Maratón Internacional Acapulco</h1>
                 <p class="muted text-sm">Participantes únicos en un vistazo general.</p>
             </div>
-            <div class="hero-highlights">
-                <div class="badge-soft">
-                    <span class="text-xs uppercase tracking-wide">Eventos analizados</span>
-                    <span id="summary-events" class="text-lg font-extrabold">—</span>
+            <div class="badge-soft">
+                <span class="text-xs uppercase tracking-wide">Eventos analizados</span>
+                <span id="summary-events" class="text-lg font-extrabold">—</span>
+            </div>
+        </div>
+        <div class="panel space-y-3 bg-transparent shadow-none p-0">
+            <div class="panel-header px-0">
+                <div></div>
+                <button id="resetChronologyFilters" type="button" class="pill-button text-sm">Limpiar filtros</button>
+            </div>
+            <div class="filter-grid">
+                <div class="space-y-1">
+                    <label for="chronologyEventFilter" class="text-xs font-medium text-white">Evento</label>
+                    <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
                 </div>
-                <div class="hero-metric">
-                    <p class="hero-metric-label">Participantes únicos</p>
-                    <p id="summary-participants-hero" class="hero-metric-value">—</p>
+                <div class="space-y-1">
+                    <label for="chronologyGenderFilter" class="text-xs font-medium text-white">Sexo</label>
+                    <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="chronologyCategoryFilter" class="text-xs font-medium text-white">Categoría de edad</label>
+                    <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option value="">Todas</option>
+                    </select>
                 </div>
             </div>
+            <div id="activeFiltersSummary" class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-gray-300"></div>
         </div>
     </div>
 
-    <section class="panorama-grid">
-        <div class="panel space-y-3 stat-panel">
-            <div class="panel-header pb-0">
-                <h2 class="panel-title">Totales destacados</h2>
-            </div>
+    <section class="insights-grid items-stretch insights-grid-combined">
+        <div class="panel space-y-3 wide-card">
             <div class="stat-grid">
                 <div class="stat-card highlight space-y-1">
                     <p class="stat-label">Participantes únicos</p>
@@ -59,33 +75,7 @@
             </div>
         </div>
 
-        <div class="panel space-y-3 filter-panel">
-            <div class="panel-header pb-0">
-                <h2 class="panel-title">Filtros</h2>
-                <p class="muted text-xs">Ajusta el panorama por evento, sexo y categoría.</p>
-            </div>
-            <div class="filter-grid">
-                <div class="space-y-1">
-                    <label for="chronologyEventFilter" class="text-xs font-medium text-white">Evento</label>
-                    <select id="chronologyEventFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></select>
-                </div>
-                <div class="space-y-1">
-                    <label for="chronologyGenderFilter" class="text-xs font-medium text-white">Sexo</label>
-                    <select id="chronologyGenderFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                        <option value="">Todos</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label for="chronologyCategoryFilter" class="text-xs font-medium text-white">Categoría de edad</label>
-                    <select id="chronologyCategoryFilter" class="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
-                        <option value="">Todas</option>
-                    </select>
-                </div>
-            </div>
-            <div id="activeFiltersSummary" class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-gray-300"></div>
-        </div>
-
-        <div class="panel trend-panel">
+        <div class="panel">
             <div class="panel-header">
                 <div>
                     <h2 class="panel-title">Participantes por edición</h2>
@@ -96,7 +86,7 @@
             </div>
         </div>
 
-        <div class="panel space-y-2 age-panel">
+        <div class="panel space-y-2">
             <div>
                 <p class="eyebrow mb-1">Distribución por edades</p>
             </div>
@@ -105,7 +95,7 @@
             </div>
         </div>
 
-        <div class="panel space-y-3 pace-panel">
+        <div class="panel space-y-3">
             <div class="panel-header flex-wrap gap-3">
                 <div>
                     <p class="eyebrow mb-1">Ritmos populares</p>

@@ -492,42 +492,6 @@ footer {
     pointer-events: none;
 }
 
-.hero-header {
-    align-items: flex-start;
-}
-
-.hero-highlights {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.hero-metric {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 0.65rem 0.9rem;
-    min-width: 170px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.hero-metric-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #9ca3af;
-    margin: 0 0 0.15rem;
-}
-
-.hero-metric-value {
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: #a7f3d0;
-    line-height: 1.1;
-}
-
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -705,26 +669,6 @@ footer {
     height: 260px;
 }
 
-.panorama-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-areas:
-        "stats filters age"
-        "trend trend trend"
-        "pace pace pace";
-    gap: 1rem;
-}
-
-.panorama-grid .stat-panel { grid-area: stats; }
-.panorama-grid .filter-panel { grid-area: filters; }
-.panorama-grid .age-panel { grid-area: age; }
-.panorama-grid .trend-panel { grid-area: trend; }
-.panorama-grid .pace-panel { grid-area: pace; }
-
-.panorama-grid .panel-header.pb-0 {
-    margin-bottom: 0;
-}
-
 @media (max-width: 1200px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -733,29 +677,11 @@ footer {
     .insights-grid {
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
-
-    .panorama-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-areas:
-            "stats filters"
-            "age trend"
-            "pace trend";
-    }
 }
 
 @media (max-width: 900px) {
     .insights-grid-combined .wide-card {
         grid-column: span 1;
-    }
-
-    .panorama-grid {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "stats"
-            "filters"
-            "age"
-            "trend"
-            "pace";
     }
 }
 
