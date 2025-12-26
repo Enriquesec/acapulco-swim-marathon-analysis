@@ -13,10 +13,7 @@
         </div>
         <div class="panel space-y-3 bg-transparent shadow-none p-0">
             <div class="panel-header px-0">
-                <div>
-                    <p class="eyebrow mb-1">Filtros</p>
-                    <h2 class="panel-title">Vista dinámica de participantes</h2>
-                </div>
+                <div></div>
                 <button id="resetChronologyFilters" type="button" class="pill-button text-sm">Limpiar filtros</button>
             </div>
             <div class="filter-grid">
@@ -41,49 +38,43 @@
         </div>
     </div>
 
-    <div class="panel space-y-3">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow mb-1">Resumen</p>
-                <h2 class="panel-title">Participantes y composición</h2>
-            </div>
-        </div>
-        <div class="stat-grid">
-            <div class="stat-card highlight space-y-1">
-                <p class="stat-label">Participantes únicos</p>
-                <p id="summary-participants" class="stat-value large">—</p>
-                <p class="muted text-xs">Sin duplicados por edición.</p>
-            </div>
-            <div class="stat-card space-y-2">
-                <p class="stat-label">Mujeres vs Hombres</p>
-                <div class="stat-split">
-                    <div class="stat-mini">
-                        <span id="summary-female" class="text-green-300 text-xl font-bold">—</span>
-                        <span class="muted text-xs">Mujeres únicas</span>
-                    </div>
-                    <div class="stat-mini">
-                        <span id="summary-male" class="text-yellow-300 text-xl font-bold">—</span>
-                        <span class="muted text-xs">Hombres únicos</span>
+    <section class="insights-grid items-stretch insights-grid-combined">
+        <div class="panel space-y-3 wide-card">
+            <div class="stat-grid">
+                <div class="stat-card highlight space-y-1">
+                    <p class="stat-label">Participantes únicos</p>
+                    <p id="summary-participants" class="stat-value large">—</p>
+                    <p class="muted text-xs">Sin duplicados por edición.</p>
+                </div>
+                <div class="stat-card space-y-2">
+                    <p class="stat-label">Mujeres vs Hombres</p>
+                    <div class="stat-split">
+                        <div class="stat-mini">
+                            <span id="summary-female" class="text-green-300 text-xl font-bold">—</span>
+                            <span class="muted text-xs">Mujeres únicas</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span id="summary-male" class="text-yellow-300 text-xl font-bold">—</span>
+                            <span class="muted text-xs">Hombres únicos</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="stat-card space-y-2">
-                <p class="stat-label">Participantes por distancia</p>
-                <div class="stat-split">
-                    <div class="stat-mini">
-                        <span id="summary-1k" class="text-green-300 text-xl font-bold">—</span>
-                        <span class="muted text-xs">Participantes 1K</span>
-                    </div>
-                    <div class="stat-mini">
-                        <span id="summary-5k" class="text-green-300 text-xl font-bold">—</span>
-                        <span class="muted text-xs">Participantes 5K</span>
+                <div class="stat-card space-y-2">
+                    <p class="stat-label">Participantes por distancia</p>
+                    <div class="stat-split">
+                        <div class="stat-mini">
+                            <span id="summary-1k" class="text-green-300 text-xl font-bold">—</span>
+                            <span class="muted text-xs">Participantes 1K</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span id="summary-5k" class="text-green-300 text-xl font-bold">—</span>
+                            <span class="muted text-xs">Participantes 5K</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <section class="insights-grid items-stretch">
         <div class="panel">
             <div class="panel-header">
                 <div>
