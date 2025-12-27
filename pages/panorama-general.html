@@ -1,21 +1,25 @@
 <div class="dashboard-shell dashboard-compact space-y-4">
-    <div class="panel hero-card">
-        <div class="panel-header">
-            <div class="space-y-1">
-                <p class="eyebrow">Dashboard</p>
-                <h1 class="text-3xl md:text-4xl font-extrabold leading-tight text-white">Maratón Internacional Acapulco</h1>
-                <p class="muted text-sm">Participantes únicos en un vistazo general.</p>
+    <section class="overview-row">
+        <div class="panel hero-card space-y-4">
+            <div class="panel-header">
+                <div class="space-y-1">
+                    <p class="eyebrow">Dashboard</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight text-white">Maratón Internacional Acapulco</h1>
+                    <p class="muted text-sm">Participantes únicos en un vistazo general.</p>
+                </div>
+                <div class="badge-soft">
+                    <span class="text-xs uppercase tracking-wide">Eventos analizados</span>
+                    <span id="summary-events" class="text-lg font-extrabold">—</span>
+                </div>
             </div>
-            <div class="badge-soft">
-                <span class="text-xs uppercase tracking-wide">Eventos analizados</span>
-                <span id="summary-events" class="text-lg font-extrabold">—</span>
+            <div class="chart-area h-60">
+                <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
             </div>
         </div>
-        <div class="panel space-y-3 bg-transparent shadow-none p-0">
-            <div class="panel-header px-0">
-                <div></div>
-                <button id="resetChronologyFilters" type="button" class="pill-button text-sm">Limpiar filtros</button>
-            </div>
+    </section>
+
+    <section class="counts-row">
+        <div class="panel space-y-3 wide-card">
             <div class="filter-grid">
                 <div class="space-y-1">
                     <label for="chronologyEventFilter" class="text-xs font-medium text-white">Evento</label>
@@ -35,18 +39,13 @@
                 </div>
             </div>
             <div id="activeFiltersSummary" class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-gray-300"></div>
-        </div>
-    </div>
-
-    <section class="insights-grid items-stretch insights-grid-combined">
-        <div class="panel space-y-3 wide-card">
             <div class="stat-grid">
-                <div class="stat-card highlight space-y-1">
+                <div class="stat-card emphasis space-y-1">
                     <p class="stat-label">Participantes únicos</p>
                     <p id="summary-participants" class="stat-value large">—</p>
                     <p class="muted text-xs">Sin duplicados por edición.</p>
                 </div>
-                <div class="stat-card space-y-2">
+                <div class="stat-card emphasis space-y-2">
                     <p class="stat-label">Mujeres vs Hombres</p>
                     <div class="stat-split">
                         <div class="stat-mini">
@@ -59,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-card space-y-2">
+                <div class="stat-card emphasis space-y-2">
                     <p class="stat-label">Participantes por distancia</p>
                     <div class="stat-split">
                         <div class="stat-mini">
@@ -74,18 +73,9 @@
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <h2 class="panel-title">Participantes por edición</h2>
-                </div>
-            </div>
-            <div class="chart-area">
-                <canvas id="chronologyTrendChart" class="chart-canvas"></canvas>
-            </div>
-        </div>
-
+    <section class="charts-grid">
         <div class="panel space-y-2">
             <div>
                 <p class="eyebrow mb-1">Distribución por edades</p>
