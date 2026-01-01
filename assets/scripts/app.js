@@ -256,14 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Delegación de eventos para botones cargados dinámicamente
-    document.addEventListener('click', (event) => {
-        // Comprobar si el clic fue en el botón de "Ver Convocatoria Completa"
-        if (event.target.matches('a[data-target="pages/convocatoria-oficial.html"]')) {
-            event.preventDefault();
-            loadContent('pages/convocatoria-oficial.html');
-        }
-    });
 });
 
 const navigateToResultsDetail = (participantKey, participantName = '') => {
@@ -292,6 +284,8 @@ async function setupResultsPage() {
     const prevResultsButton = document.getElementById('prevResults');
     const nextResultsButton = document.getElementById('nextResults');
     const resultsPageIndicator = document.getElementById('resultsPageIndicator');
+    const shareFeedback = document.getElementById('shareFeedback');
+    let shareFeedbackTimeoutId = null;
 
     const RESULTS_PER_PAGE = 10;
     let currentPage = 1;
@@ -305,6 +299,20 @@ async function setupResultsPage() {
         const safeMinutes = String(minutes || '0').padStart(2, '0');
         const safeSeconds = String(seconds || '0').padStart(2, '0');
         return `${safeHours}:${safeMinutes}:${safeSeconds}`;
+    };
+
+    const setShareFeedback = (message, tone = 'success') => {
+        if (!shareFeedback) return;
+        shareFeedback.textContent = message;
+        shareFeedback.classList.remove('hidden');
+        shareFeedback.classList.toggle('text-green-300', tone === 'success');
+        shareFeedback.classList.toggle('text-red-300', tone !== 'success');
+        if (shareFeedbackTimeoutId) {
+            clearTimeout(shareFeedbackTimeoutId);
+        }
+        shareFeedbackTimeoutId = setTimeout(() => {
+            shareFeedback.classList.add('hidden');
+        }, 3500);
     };
 
     const normalizeResult = (result) => {
@@ -491,6 +499,131 @@ async function setupResultsPage() {
             }])
         );
 
+        const getBestRecord = (records = []) => {
+            if (!records.length) return null;
+            let best = null;
+
+            records.forEach(record => {
+                const parsedTime = parseResultTimeInMinutes(record);
+                if (parsedTime === null) {
+                    if (!best) best = record;
+                    return;
+                }
+                if (!best) {
+                    best = record;
+                    return;
+                }
+
+                const bestTime = parseResultTimeInMinutes(best);
+                if (bestTime === null || parsedTime < bestTime) {
+                    best = record;
+                } else if (parsedTime === bestTime) {
+                    const currentYear = parseInt(record.year, 10) || 0;
+                    const bestYear = parseInt(best.year, 10) || 0;
+                    if (currentYear > bestYear) {
+                        best = record;
+                    }
+                }
+            });
+
+            return best;
+        };
+
+        const getBestMarksByDistance = (records = []) => {
+            const bestMap = new Map();
+            records.forEach(record => {
+                const normalizedDistance = normalizeDistanceLabel(record.distance || record.distancia);
+                if (!normalizedDistance) return;
+                const time = parseResultTimeInMinutes(record);
+                const currentBest = bestMap.get(normalizedDistance);
+                if (!currentBest) {
+                    bestMap.set(normalizedDistance, record);
+                    return;
+                }
+                const currentBestTime = parseResultTimeInMinutes(currentBest);
+                if (time === null && currentBestTime !== null) return;
+                if (time !== null && currentBestTime === null) {
+                    bestMap.set(normalizedDistance, record);
+                    return;
+                }
+                if (time !== null && currentBestTime !== null && time < currentBestTime) {
+                    bestMap.set(normalizedDistance, record);
+                    return;
+                }
+                if (time !== null && currentBestTime !== null && time === currentBestTime) {
+                    const currentYear = parseInt(record.year, 10) || 0;
+                    const bestYear = parseInt(currentBest.year, 10) || 0;
+                    if (currentYear > bestYear) {
+                        bestMap.set(normalizedDistance, record);
+                    }
+                }
+            });
+            return bestMap;
+        };
+
+        const formatEventLabelForShare = (record) => {
+            if (!record) return 'Resultados históricos';
+            const edition = record.eventEdition ? `${record.eventEdition}° Maratón Acapulco` : (record.event || 'Edición N/D');
+            const year = record.year || 'Año N/D';
+            return `${edition} · ${year}`;
+        };
+
+        const buildSharePayload = (participant) => {
+            const bestRecord = getBestRecord(participant.records);
+            const heroRecord = bestRecord || participant.records[0] || null;
+            const distanceLabel = normalizeDistanceLabel(heroRecord?.distance) || heroRecord?.distance || 'Maratón Acapulco';
+            const timeLabel = heroRecord?.time || 'Sin tiempo registrado';
+            const eventLabel = formatEventLabelForShare(heroRecord);
+            const shareUrl = window.location.href.split('#')[0];
+            const baseText = `${participant.name} • ${distanceLabel} en ${timeLabel} (${eventLabel}).`;
+            const hashtags = '#MaratonAcapulco #AguasAbiertas';
+
+            return {
+                shareData: {
+                    title: `${participant.name} - Resultados`,
+                    text: `${baseText} ${hashtags}`,
+                    url: shareUrl
+                },
+                copyText: `${baseText} ${hashtags} ${shareUrl}`,
+                visual: {
+                    distanceLabel,
+                    timeLabel,
+                    eventLabel,
+                    badge: bestRecord ? 'Marca destacada' : 'Perfil registrado'
+                }
+            };
+        };
+
+        const handleShareParticipant = async (participant) => {
+            const payload = buildSharePayload(participant);
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(payload.shareData);
+                    setShareFeedback('Compartido: listo para publicar en tu app favorita.');
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') return;
+                    console.warn('No se pudo usar Web Share API, aplicando fallback.', error);
+                }
+            }
+
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.shareData.url)}&quote=${encodeURIComponent(payload.shareData.text)}`;
+            window.open(fbUrl, '_blank', 'noopener');
+
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(payload.copyText);
+                    setShareFeedback('Abrí Facebook y copié el texto para pegarlo en Instagram.');
+                } catch (clipboardError) {
+                    console.warn('No se pudo copiar al portapapeles', clipboardError);
+                    setShareFeedback('Abrí Facebook. Si quieres Instagram, copia el texto manualmente.', 'error');
+                }
+            } else {
+                setShareFeedback('Abrí Facebook. Si quieres Instagram, copia el texto manualmente.', 'error');
+            }
+        };
+
         const hideResultsNavigation = () => {
             if (resultsNavigation) {
                 resultsNavigation.classList.add('hidden');
@@ -552,19 +685,59 @@ async function setupResultsPage() {
             const paginatedResults = currentResults.slice(start, start + RESULTS_PER_PAGE);
 
             resultsContainer.innerHTML = paginatedResults.map(result => {
+                const hasRecords = result.records.length > 0;
+                const bestRecord = getBestRecord(result.records);
+                const heroRecord = bestRecord || result.records[0] || null;
+                const bestByDistance = getBestMarksByDistance(result.records);
+                const best1k = bestByDistance.get('1K') || null;
+                const best5k = bestByDistance.get('5K') || null;
+                const distanceLabel = heroRecord ? (normalizeDistanceLabel(heroRecord.distance) || heroRecord.distance) : 'Sin distancia';
+                const timeLabel = heroRecord?.time || 'Tiempo N/D';
+                const eventLabel = formatEventLabelForShare(heroRecord);
+                const categoryLabel = heroRecord?.category || 'Categoría N/D';
+                const positionsLine = heroRecord
+                    ? `Gral. ${heroRecord.positionGeneral} · Rama ${heroRecord.positionGender} · Cat. ${heroRecord.positionCategory}`
+                    : 'Sin posiciones registradas';
+                const originLabel = result.origin || 'Procedencia no registrada';
+                const genderLabel = result.gender && result.gender !== '—' ? result.gender : 'Sexo N/D';
+                const formatBestLabel = (record, distance) => record
+                    ? `${record.time || 'Tiempo N/D'} · ${formatEventLabelForShare(record)}`
+                    : `Sin marca ${distance}`;
+
                 return `
-                    <div class="card text-left space-y-4 cursor-pointer hover:border-green-400" data-competitor-key="${result.key}">
-                        <div class="space-y-1">
-                            <p class="text-xs uppercase tracking-wide text-green-400">Competidor</p>
-                            <h3 class="text-2xl font-bold">${result.name}</h3>
-                            <p class="text-sm text-gray-500">Sexo: ${result.gender || 'N/D'}</p>
-                            <p class="text-sm text-gray-500">Participaciones: ${result.records.length}</p>
-                        </div>
-                        ${result.records.length === 0 ? `
-                            <div class="bg-gray-900 rounded-lg p-4 text-sm text-gray-400">
-                                Aún no registramos resultados históricos para este participante.
+                    <div class="share-card cursor-pointer" data-competitor-key="${result.key}">
+                        <div class="share-card__header">
+                            <div>
+                                <h3 class="share-card__title">${result.name}</h3>
+                                <p class="share-card__subtitle">${distanceLabel} • ${timeLabel} • ${eventLabel}</p>
                             </div>
-                        ` : ''}
+                            <button class="share-button" type="button" data-share-key="${result.key}">
+                                Compartir
+                            </button>
+                        </div>
+                        <div class="share-card__meta">
+                            <div class="share-pill">
+                                <span>Mejor 1K</span>
+                                <strong>${best1k ? best1k.time : '—'}</strong>
+                                <small>${best1k ? formatEventLabelForShare(best1k) : 'Sin marca 1K'}</small>
+                            </div>
+                            <div class="share-pill">
+                                <span>Mejor 5K</span>
+                                <strong>${best5k ? best5k.time : '—'}</strong>
+                                <small>${best5k ? formatEventLabelForShare(best5k) : 'Sin marca 5K'}</small>
+                            </div>
+                            <div class="share-pill">
+                                <span>Participaciones</span>
+                                <strong>${result.records.length}</strong>
+                                <small>${positionsLine}</small>
+                            </div>
+                        </div>
+                        <div class="share-extra">
+                            <span class="tag">${originLabel}</span>
+                            <span class="tag">${genderLabel}</span>
+                            <span class="tag">${categoryLabel}</span>
+                            ${result.team ? `<span class="tag">Equipo: ${result.team}</span>` : ''}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -735,6 +908,30 @@ async function setupResultsPage() {
                     { label: '5K', distance: '5K' }
                 ];
 
+                const bestByDistance = getBestMarksByDistance(selectedParticipant.records);
+                const best1k = bestByDistance.get('1K') || null;
+                const best5k = bestByDistance.get('5K') || null;
+                const bestHero = getBestRecord(selectedParticipant.records);
+
+                const buildBestCard = (title, record, emptyText) => `
+                    <div class="bg-gray-800/60 rounded-xl p-4 border border-gray-700 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs uppercase tracking-wide text-green-400">${title}</p>
+                            ${record ? `<span class="text-[11px] px-2 py-1 rounded-full bg-green-500/15 border border-green-500/30">${record.category || 'Categoría N/D'}</span>` : ''}
+                        </div>
+                        <p class="text-2xl font-bold">${record ? (record.time || 'Tiempo N/D') : '—'}</p>
+                        <p class="text-sm text-gray-400">${record ? formatEventLabelForShare(record) : emptyText}</p>
+                    </div>
+                `;
+
+                const bestSummary = `
+                    <div class="grid md:grid-cols-3 gap-3 mb-4">
+                        ${buildBestCard('Mejor 1K', best1k, 'Aún sin marca 1K')}
+                        ${buildBestCard('Mejor 5K', best5k, 'Aún sin marca 5K')}
+                        ${buildBestCard('Destacado', bestHero, 'Sin resultados registrados')}
+                    </div>
+                `;
+
                 const buildSection = (section) => {
                     const sectionRecords = filtered
                         .filter(record => mapDetailDistance(record.distance) === section.distance)
@@ -784,13 +981,18 @@ async function setupResultsPage() {
                             <div class="space-y-3 flex-1">${recordsContent}</div>
                         </div>
                     `;
-                };
+                        };
 
                 const primarySections = sections.map(buildSection);
 
-                const columnsContent = `<div class="grid md:grid-cols-2 gap-4">${primarySections.join('')}</div>`;
+                const columnsContent = `${bestSummary}<div class="grid md:grid-cols-2 gap-4">${primarySections.join('')}</div>`;
 
                 detailContent.innerHTML = columnsContent || '<p class="text-gray-400">No hay participaciones que coincidan con los filtros seleccionados.</p>';
+
+                const detailShareButton = participantDetail.querySelector('[data-share-key]');
+                if (detailShareButton) {
+                    detailShareButton.onclick = () => handleShareParticipant(selectedParticipant);
+                }
             };
 
             if (closeDetailButton) {
@@ -831,6 +1033,18 @@ async function setupResultsPage() {
         };
 
         resultsContainer.addEventListener('click', (event) => {
+            const shareButton = event.target.closest('[data-share-key]');
+            if (shareButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                const key = shareButton.getAttribute('data-share-key');
+                const participant = combinedData.find(item => item.key === key);
+                if (participant) {
+                    handleShareParticipant(participant);
+                }
+                return;
+            }
+
             const card = event.target.closest('[data-competitor-key]');
             if (!card) return;
 

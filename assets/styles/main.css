@@ -147,6 +147,138 @@ footer {
     color: #3182ce; /* Coincide con text-blue-400 */
 }
 
+.share-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(16, 24, 40, 0.9) 0%, rgba(17, 24, 39, 0.85) 55%, rgba(5, 13, 26, 0.95) 100%);
+    border: 1px solid #1f2937;
+    border-radius: 18px;
+    padding: 18px 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    display: grid;
+    gap: 14px;
+}
+
+.share-card::before,
+.share-card::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(40px);
+    opacity: 0.55;
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+}
+
+.share-card::before {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 0));
+    top: -40px;
+    right: -60px;
+}
+
+.share-card::after {
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0));
+    bottom: -60px;
+    left: -80px;
+}
+
+.share-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.share-card__title {
+    margin: 4px 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    line-height: 1.2;
+}
+
+.share-card__subtitle {
+    font-size: 0.95rem;
+    color: #cbd5e0;
+    margin: 0;
+}
+
+.share-button {
+    border: 1px solid #34d399;
+    background: linear-gradient(120deg, #34d399 0%, #10b981 50%, #059669 100%);
+    color: #062216;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.35);
+}
+
+.share-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(16, 185, 129, 0.45);
+}
+
+.share-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.share-card__meta {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.share-pill {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: #d1d5db;
+    font-size: 0.9rem;
+}
+
+.share-pill strong {
+    display: block;
+    color: #34d399;
+    font-size: 1.1rem;
+}
+
+.share-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.share-extra .tag {
+    background: rgba(31, 41, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #cbd5e0;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+.share-feedback {
+    min-height: 18px;
+}
+
 @media (max-width: 768px) {
     .dashboard {
         grid-template-columns: 1fr; /* Una tarjeta por fila en dispositivos pequeños */
