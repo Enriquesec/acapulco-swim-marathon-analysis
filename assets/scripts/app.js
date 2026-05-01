@@ -325,7 +325,9 @@ async function setupResultsPage() {
             eventId: eventInfo.eventId,
             eventEdition: eventInfo.edition,
             gender: result.gender || result.sexo || '—',
-            ageGroup: Array.isArray(result.edad_categorias) ? result.edad_categorias.join(', ') : (result.edad || '—'),
+            ageGroup: Array.isArray(result.edad_categorias)
+                ? (result.edad_categorias.filter(a => a.toLowerCase() !== 'libre').join(', ') || (result.edad || '—'))
+                : (result.edad || '—'),
             participantId: result.participant_id || result.participantId || null
         };
     };
@@ -435,8 +437,8 @@ async function setupResultsPage() {
                 team: 'Participante registrado',
                 bib: participant.participant_id || 'N/D',
                 gender: participant.sexo || '—',
-                ageGroup: Array.isArray(participant.edad_categorias) && participant.edad_categorias.length > 0
-                    ? participant.edad_categorias.join(', ')
+                ageGroup: Array.isArray(participant.edad_categorias) && participant.edad_categorias.filter(a => a.toLowerCase() !== 'libre').length > 0
+                    ? participant.edad_categorias.filter(a => a.toLowerCase() !== 'libre').join(', ')
                     : '—'
             };
 
@@ -919,7 +921,7 @@ const deriveAgeGroup = (record) => {
         const trimmed = value.toString().trim().replace(/\s+/g, ' ');
         if (!trimmed) return null;
         const lower = trimmed.toLowerCase();
-        if (lower.includes('sin registro') || lower === 'nd' || lower === 'n/d') return null;
+        if (lower.includes('sin registro') || lower === 'nd' || lower === 'n/d' || lower === 'libre') return null;
         const hyphenNormalized = trimmed.replace(/\s*-\s*/g, '-');
         return hyphenNormalized;
     };
@@ -928,8 +930,11 @@ const deriveAgeGroup = (record) => {
     if (directAge) return directAge;
 
     if (Array.isArray(record.edad_categorias) && record.edad_categorias.length > 0) {
-        const joined = normalizeAge(record.edad_categorias.join(', '));
-        if (joined) return joined;
+        const validCategories = record.edad_categorias.filter(a => a.toLowerCase() !== 'libre');
+        if (validCategories.length > 0) {
+            const joined = normalizeAge(validCategories.join(', '));
+            if (joined) return joined;
+        }
     }
 
     if (record.categoria) {
@@ -2118,6 +2123,8 @@ async function initializeChronology() {
 
         updateEventGrowthSummary(participantsByEvent);
 
+        renderStateMap(aggregateParticipantsByState(normalizedRecords));
+
         const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.ageGroup))).filter(Boolean).sort();
         const eventOptions = events.map(event => {
             const info = parseEventInfo(event.name);
@@ -2224,6 +2231,7 @@ async function initializeChronology() {
 
             updateChronologySummary(filteredRecords);
             renderChronologyAgeChart(filteredRecords);
+            renderStateMap(aggregateParticipantsByState(filteredRecords));
 
             const participantMap = new Map();
             filteredRecords.forEach(record => {
