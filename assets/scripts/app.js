@@ -2123,6 +2123,8 @@ async function initializeChronology() {
 
         updateEventGrowthSummary(participantsByEvent);
 
+        renderStateMap(aggregateParticipantsByState(normalizedRecords));
+
         const uniqueCategories = Array.from(new Set(normalizedRecords.map(record => record.ageGroup))).filter(Boolean).sort();
         const eventOptions = events.map(event => {
             const info = parseEventInfo(event.name);
@@ -2229,6 +2231,7 @@ async function initializeChronology() {
 
             updateChronologySummary(filteredRecords);
             renderChronologyAgeChart(filteredRecords);
+            renderStateMap(aggregateParticipantsByState(filteredRecords));
 
             const participantMap = new Map();
             filteredRecords.forEach(record => {
